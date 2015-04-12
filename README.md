@@ -3,7 +3,7 @@ Works with Linux namespaces througth glibc with pure python
 
 ## Goals
 
-There is so many beautiful tools like [docker](), [rocket]() and [vagga]() written on go and rust, but no one on python.
+There is so many beautiful tools like [docker](https://github.com/docker/docker), [rocket](https://github.com/coreos/rkt) and [vagga](https://github.com/tailhook/vagga) written on go and rust, but no one on python.
 I think that is because there is no easy way to works wit linux namespaces on python:
 
 * you can use [asylum] - project that looks like dead and with codebase hosted not on mainstream hub like github
