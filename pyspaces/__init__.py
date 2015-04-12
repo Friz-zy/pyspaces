@@ -16,4 +16,4 @@ __version__ = '1.0'
 __all__ = ["cloning", "process"]
 
 
-from process import Container
+from .process import Container

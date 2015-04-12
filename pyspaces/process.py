@@ -2,7 +2,7 @@
 # coding=utf-8
 
 
-from cloning import *
+from .cloning import *
 from multiprocessing import Process
 
 

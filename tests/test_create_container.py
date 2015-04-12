@@ -17,7 +17,17 @@ def execute(argv):
     os.execvp(argv[0], argv)
 
 def test_basic_container(capfd):
-    """"""
+    """Check basic namespace
+
+    ```
+    bash# mount -t proc proc /proc
+    bash# ps ax
+    PID TTY      STAT   TIME COMMAND
+    1  pts/3    S      0:00 bash
+    22 pts/3    R+     0:00 ps ax
+    ```
+
+    """
     cmd = "mount -t proc proc /proc; ps ax"
     c = Container(target=execute, args=(('bash', '-c', cmd),),
                   uid_map='0 1000 1',
