@@ -3,8 +3,8 @@
 
 
 import os
-#import pytest
-from process import Container
+import pytest
+from pyspaces import Container
 
 
 def execute(argv):
@@ -15,6 +15,18 @@ def execute(argv):
 
     """
     os.execvp(argv[0], argv)
+
+def test_basic_container(capfd):
+    """"""
+    cmd = "mount -t proc proc /proc; ps ax"
+    c = Container(target=execute, args=(('bash', '-c', cmd),),
+                  uid_map='0 1000 1',
+                  newpid=True, newuser=True, newns=True
+                  )
+    c.start()
+    c.join()
+    out, err = capfd.readouterr()
+    assert len(out.splitlines()) == 3
 
 if __name__ == "__main__":
     """
