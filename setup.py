@@ -39,7 +39,7 @@ classifiers=[
 'Intended Audience :: Developers',
 'Intended Audience :: System Administrators',
 'License :: OSI Approved :: MIT License',
-'Operating System :: Linux',
+'Operating System :: POSIX :: Linux',
 'Programming Language :: Python',
 'Programming Language :: Python :: 2',
 'Programming Language :: Python :: 3',

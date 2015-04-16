@@ -15,7 +15,7 @@ I want to change it: i want to create native python bindings to glibc with inter
 
 ## Example
 
-First simpe example
+First simple example
 ```python
 from pyspaces import Container
 
