@@ -1,5 +1,6 @@
 ## [Unreleased][unreleased]
 ### Added
+- add cli
 - add click as requirement library
 
 ### Fixed

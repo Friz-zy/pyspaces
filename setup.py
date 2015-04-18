@@ -33,6 +33,11 @@ packages=find_packages(),
 cmdclass = {'test': PyTest},
 tests_require=['pytest', 'pytest_capturelog', 'pytest-cov'],
 install_requires=['click'],
+entry_points={
+'console_scripts': [
+'space = pyspaces.cli:cli',
+]
+},
 classifiers=[
 'Development Status :: 3 - Alpha',
 'Environment :: Console',
