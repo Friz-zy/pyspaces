@@ -1,4 +1,6 @@
 ## [Unreleased][unreleased]
+### Added
+- add click as requirement library
 
 ## 1.0.5 - 2015-04-18
 ### Added

@@ -32,7 +32,7 @@ long_description=open(join(dirname(__file__), 'README.md')).read(),
 packages=find_packages(),
 cmdclass = {'test': PyTest},
 tests_require=['pytest', 'pytest_capturelog', 'pytest-cov'],
-install_requires=[],
+install_requires=['click'],
 classifiers=[
 'Development Status :: 3 - Alpha',
 'Environment :: Console',
