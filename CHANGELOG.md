@@ -22,4 +22,5 @@
 - cloning.py and process.py as first working concept
 - initial commit with necessary files
 
-[unreleased](https://github.com/Friz-zy/pyspaces/compare/v1.0...HEAD)
+[unreleased](https://github.com/Friz-zy/pyspaces/compare/v1.0.5...HEAD)
+[1.0-1.0.5](https://github.com/Friz-zy/pyspaces/compare/v1.0...v1.0.5)
