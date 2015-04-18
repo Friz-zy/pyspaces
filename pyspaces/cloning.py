@@ -121,6 +121,7 @@ class Clone(Popen):
         # Close the write end of the pipe, to signal to the child that we
         # have updated the UID and GID maps
         os.close(self.pipe_fd[1])
+        self.sentinel = self.pipe_fd[0]
 
     def child(self):
         """Start function for cloned child.
