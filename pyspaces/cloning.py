@@ -5,15 +5,12 @@
 import os
 import sys
 import signal
-from ctypes import *
+from libc import *
 try:
     from multiprocessing.forking import Popen
 except ImportError:
     from multiprocessing.popen_fork import Popen
 
-
-libc = CDLL("libc.so.6")
-"""Import libc.so.6 as libc"""
 
 STACK_SIZE = 1024 * 1024
 """STACK_SIZE (1024 * 1024)"""
