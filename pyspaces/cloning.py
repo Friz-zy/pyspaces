@@ -5,7 +5,7 @@
 import os
 import sys
 import signal
-from libc import *
+from .libc import *
 try:
     from multiprocessing.forking import Popen
 except ImportError:
