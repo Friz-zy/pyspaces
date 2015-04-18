@@ -24,7 +24,7 @@ def execute(argv):
     os.execvp(argv[0], argv)
 
 cmd = "mount -t proc proc /proc; ps ax"
-c = Container(target=execute, args=(('bash', '-c', cmd),
+c = Container(target=execute, args=(('bash', '-c', cmd),),
               uid_map='0 1000 1',
               newpid=True, newuser=True, newns=True
               )

@@ -2,6 +2,9 @@
 ### Added
 - add click as requirement library
 
+### Fixed
+- example in readme
+
 ## 1.0.5 - 2015-04-18
 ### Added
 - CHANGELOG.md
