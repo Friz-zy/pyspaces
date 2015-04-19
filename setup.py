@@ -3,6 +3,7 @@
 from __future__ import with_statement
 import sys
 import pyspaces
+from subprocess import call
 from setuptools import setup, find_packages, Command
 from os.path import join, dirname
 
@@ -19,6 +20,12 @@ class PyTest(Command):
         errno = subprocess.call(['py.test', '--cov', 'pyspaces', 'tests'])
         raise SystemExit(errno)
 
+def md2rst(path):
+    cmd = 'pandoc --from=markdown --to=rst --output={1} {0}'
+    rst = path.replace('md', 'rst')
+    call(cmd.format(path, rst), shell=True)
+    return rst
+
 setup(
 name='pyspaces',
 version=pyspaces.__version__,
@@ -28,7 +35,7 @@ description = pyspaces.__description__,
 license = pyspaces.__license__,
 keywords = pyspaces.__keywords__,
 url = pyspaces.__url__,
-long_description=open(join(dirname(__file__), 'README.md')).read(),
+long_description=md2rst(join(dirname(__file__), 'README.md')),
 packages=find_packages(),
 cmdclass = {'test': PyTest},
 tests_require=['pytest', 'pytest_capturelog', 'pytest-cov'],
