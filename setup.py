@@ -24,6 +24,8 @@ def md2rst(path):
     cmd = 'pandoc --from=markdown --to=rst --output={1} {0}'
     rst = path.replace('md', 'rst')
     call(cmd.format(path, rst), shell=True)
+    with open(rst) as f:
+        rst = f.read()
     return rst
 
 setup(

@@ -11,7 +11,7 @@ __license__ = "MIT"
 __maintainer__ = "Filipp Frizzy"
 __email__ = "filipp.s.frizzy@gmail.com"
 __status__ = "Development"
-__version__ = '1.1.1'
+__version__ = '1.1.2'
 
 __all__ = ["cloning", "process", "libc", "cli"]
 
