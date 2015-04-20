@@ -4,7 +4,7 @@ Works with Linux namespaces througth glibc with pure python
 ## Goals
 
 There is so many beautiful tools like [docker](https://github.com/docker/docker), [rocket](https://github.com/coreos/rkt) and [vagga](https://github.com/tailhook/vagga) written on go and rust, but no one on python.
-I think that is because there is no easy way to works wit linux namespaces on python:
+I think that is because there is no easy way to works with linux namespaces on python:
 
 * you can use [asylum](https://pypi.python.org/pypi/asylum/0.4.1) - project that looks like dead and with codebase hosted not on mainstream hub like github
 * or you can use [python-libvirt](https://pypi.python.org/pypi/libvirt-python/1.2.13) bindings with big layer of abstraction
@@ -15,8 +15,9 @@ I want to change it: i want to create native python bindings to glibc with inter
 
 ## Example
 
-First simple example
+First simple example:
 ```python
+import os
 from pyspaces import Container
 
 
@@ -33,6 +34,7 @@ print("PID of child created by clone() is %ld\n" % c.pid)
 c.join()
 print("Child returned: pid %s, status %s" % (c.pid, c.exitcode))
 ```
+output:
 ```bash
 PID of child created by clone() is 15978
 
@@ -43,7 +45,8 @@ PID TTY      STAT   TIME COMMAND
 Child returned: pid 15978, status 0
 ```
 
-CLI
+## CLI
+
 ```bash
 space -v execute --pid --fs --user --uid '0 1000 1' bash
 ```

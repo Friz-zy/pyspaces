@@ -1,4 +1,6 @@
 ## [Unreleased][unreleased]
+## Added
+- docs
 
 ## 1.1.2 - 2015-04-19
 ### Fixed
