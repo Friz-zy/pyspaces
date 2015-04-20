@@ -4,26 +4,24 @@
 
 import os
 import click
+from . import __version__
 from .process import Container
 
 
-
-class Space(object):
-
-    def __init__(self):
-        pass
-
-
-pass_space = click.make_pass_decorator(Space)
+pass_space = click.make_pass_decorator(object)
 
 
 @click.group()
 @click.option('--verbose', '-v', is_flag=True,
               help='Enables verbose mode.')
-@click.version_option('1.0.5')
+@click.version_option(__version__)
 @click.pass_context
 def cli(ctx, verbose):
     """Space is tool for managing linux namespaces containers."""
+    class Space(object):
+        def __init__(self):
+            pass
+
     ctx.obj = Space()
     ctx.obj.verbose = verbose
 

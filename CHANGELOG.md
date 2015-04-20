@@ -1,4 +1,7 @@
 ## [Unreleased][unreleased]
+### Changed
+- cli version
+
 ## Added
 - pins in readme
 - docs
