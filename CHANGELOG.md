@@ -1,4 +1,7 @@
 ## [Unreleased][unreleased]
+### Changed
+- cli example in readme
+
 ### Fixed
 - cli verbose mode
 
