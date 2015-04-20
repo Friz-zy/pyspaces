@@ -1,4 +1,6 @@
 ## [Unreleased][unreleased]
+### Fixed
+- cli verbose mode
 
 ## 1.1.3 - 2015-04-20
 ### Removed

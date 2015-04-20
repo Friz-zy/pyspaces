@@ -79,10 +79,10 @@ def execute(args, argv):
               newuts=args.uts, newipc=args.ipc, newnet=args.net)
     c.start()
     if args.verbose:
-        click.echo("PID of child created by clone() is %ld\n" % c.pid)
+        print("PID of child created by clone() is %ld\n" % c.pid)
     c.join()
     if args.verbose:
-        click.echo("Child returned: pid %s, status %s" % (c.pid, c.exitcode))
+        print("Child returned: pid %s, status %s" % (c.pid, c.exitcode))
 
 
 if __name__ == '__main__':
