@@ -1,7 +1,6 @@
 docs_dir: 'docs'
 pages:
 - [index.md, Home]
-- [pyspaces/index.md, pyspaces]
 - [pyspaces/cli.md, pyspaces, cli]
 - [pyspaces/cloning.md, pyspaces, cloning]
 - [pyspaces/libc.md, pyspaces, libc]
