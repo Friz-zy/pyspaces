@@ -1,6 +1,9 @@
 ## [Unreleased][unreleased]
+### Removed
+- click from requireds
+
 ### Changed
-- cli version
+- cli version now used argparse instead of click
 
 ## Added
 - pins in readme
