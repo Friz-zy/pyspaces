@@ -1,5 +1,6 @@
 ## [Unreleased][unreleased]
 ## Added
+- pins in readme
 - docs
 
 ## 1.1.2 - 2015-04-19

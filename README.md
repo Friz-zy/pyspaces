@@ -1,6 +1,12 @@
 # pyspaces
 Works with Linux namespaces througth glibc with pure python
 
+[![License](https://pypip.in/license/pyspaces/badge.svg)](https://pypi.python.org/pypi/pyspaces/)
+[![Latest Version](https://pypip.in/version/pyspaces/badge.svg)](https://pypi.python.org/pypi/pyspaces/)
+[![Downloads](https://pypip.in/download/pyspaces/badge.svg)](https://pypi.python.org/pypi/pyspaces/)
+[![Docs](https://readthedocs.org/projects/pyspaces/badge/)](https://pyspaces.readthedocs.org/en/latest/)
+
+
 ## Goals
 
 There is so many beautiful tools like [docker](https://github.com/docker/docker), [rocket](https://github.com/coreos/rkt) and [vagga](https://github.com/tailhook/vagga) written on go and rust, but no one on python.
