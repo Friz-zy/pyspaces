@@ -1,4 +1,6 @@
 ## [Unreleased][unreleased]
+
+## 1.2 - 2015-04-21
 ## Added
 - new class Chroot in process.py
 - chroot option in cli
@@ -59,7 +61,8 @@
 - cloning.py and process.py as first working concept
 - initial commit with necessary files
 
-[unreleased](https://github.com/Friz-zy/pyspaces/compare/v1.1.3...HEAD)
+[unreleased](https://github.com/Friz-zy/pyspaces/compare/v1.2...HEAD)
+[1.1.3-1.2](https://github.com/Friz-zy/pyspaces/compare/v1.1.3...v1.2)
 [1.1.2-1.1.3](https://github.com/Friz-zy/pyspaces/compare/v1.1.2...v1.1.3)
 [1.1.1-1.1.2](https://github.com/Friz-zy/pyspaces/compare/v1.1.1...v1.1.2)
 [1.1-1.1.1](https://github.com/Friz-zy/pyspaces/compare/v1.1...v1.1.1)
