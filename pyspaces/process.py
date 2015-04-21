@@ -2,6 +2,7 @@
 # coding=utf-8
 
 
+from os import chroot
 from .cloning import *
 from multiprocessing import Process
 
@@ -127,3 +128,55 @@ class Container(Process):
 
         Process.__init__(self, *args, **kwargs)
 
+class Chroot(Container):
+    """Class wrapper over `pyspaces.Container`.
+
+    Chroot objects represent activity that is run in a separate process
+    in new filesystem and user namespaces.
+
+    The class is analagous to `threading.Thread`.
+
+    """
+    def __init__(self, path, target, args=(), kwargs={}, *cargs, **ckwargs):
+        """Set target and clone flags and execute Container.__init__
+
+        Set newuser and newns clone flags, set self.chroot
+        as target with necessary args and kwargs. Then
+        execute Container.__init__ with updated parameters.
+
+        Args:
+          path (str): path to chroot new root
+          target (python function): python function
+            for executing after chroot
+          args (list): args for target
+          kwargs (dict): kwargs for target
+          *cargs (list): arguments for Container.__init__
+          **ckwargs (dict): arguments for Container.__init__
+
+        """
+        ckwargs['args'] = ()
+        ckwargs['kwargs'] = {
+            'path': path, 'target': target,
+            'args': args, 'kwargs': kwargs
+        }
+        ckwargs['target'] = self.chroot
+        ckwargs['newuser'] = True
+        ckwargs['newns'] = True
+        Container.__init__(self, *cargs, **ckwargs)
+
+    def chroot(self, path, target, args=(), kwargs={}):
+        """Change root and execute target.
+
+        Change root with os.chroot. Then execute
+        target with args and kwargs.
+
+        Args:
+          path (str): path to chroot new root
+          target (python function): python function
+            for executing after chroot
+          args (list): args for target
+          kwargs (dict): kwargs for target
+
+        """
+        chroot(path)
+        return target(*args, **kwargs)

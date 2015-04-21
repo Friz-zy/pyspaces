@@ -57,6 +57,114 @@ Variables
 
 Classes
 -------
+#### Chroot 
+Class wrapper over `pyspaces.Container`.
+  
+Chroot objects represent activity that is run in a separate process
+in new filesystem and user namespaces.
+  
+The class is analagous to `threading.Thread`.
+
+##### Ancestors (in MRO)
+- pyspaces.process.Chroot
+
+- pyspaces.process.Container
+
+- multiprocessing.process.Process
+
+- __builtin__.object
+
+##### Instance variables
+- **authkey**
+
+- **clone_flags**
+
+- **daemon**
+
+    Return whether process is a daemon
+
+- **exitcode**
+
+    Return exit code of process or `None` if it has yet to stop
+
+- **gid_map**
+
+- **ident**
+
+    Return identifier (PID) of process or `None` if it has yet to start
+
+- **map_zero**
+
+- **name**
+
+- **pid**
+
+    Return identifier (PID) of process or `None` if it has yet to start
+
+- **uid_map**
+
+##### Methods
+- **__init__** (self, path, target, args=(), kwargs={}, *cargs, **ckwargs)
+
+    Set target and clone flags and execute Container.__init__
+  
+    Set newuser and newns clone flags, set self.chroot
+as target with necessary args and kwargs. Then
+execute Container.__init__ with updated parameters.
+  
+    Args:  
+
+    * path (str): path to chroot new root
+
+    * target (python function): python function
+for executing after chroot
+
+    * args (list): args for target
+
+    * kwargs (dict): kwargs for target
+
+    * *cargs (list): arguments for Container.__init__
+
+    * **ckwargs (dict): arguments for Container.__init__
+
+- **chroot** (self, path, target, args=(), kwargs={})
+
+    Change root and execute target.
+  
+    Change root with os.chroot. Then execute
+target with args and kwargs.
+  
+    Args:  
+
+    * path (str): path to chroot new root
+
+    * target (python function): python function
+for executing after chroot
+
+    * args (list): args for target
+
+    * kwargs (dict): kwargs for target
+
+- **is_alive** (self)
+
+    Return whether process is alive
+
+- **join** (self, timeout=None)
+
+    Wait until child process terminates
+
+- **run** (self)
+
+    Method to be run in sub-process; can be overridden in sub-class
+
+- **start** (self)
+
+    Start child process
+
+- **terminate** (self)
+
+    Terminate process; sends SIGTERM signal or uses TerminateProcess()
+
 #### Container 
 Class wrapper over `multiprocessing.Process`.
   
@@ -70,6 +178,9 @@ The class is analagous to `threading.Thread`.
 - multiprocessing.process.Process
 
 - __builtin__.object
+
+##### Descendents
+- pyspaces.process.Chroot
 
 ##### Instance variables
 - **authkey**

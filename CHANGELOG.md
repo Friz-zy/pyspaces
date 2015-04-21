@@ -1,4 +1,8 @@
 ## [Unreleased][unreleased]
+## Added
+- new class Chroot in process.py
+- chroot option in cli
+
 ### Changed
 - cli example in readme
 
