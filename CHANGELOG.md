@@ -1,5 +1,6 @@
 ## [Unreleased][unreleased]
 ### Changed
+- update importing in process.py
 - docstrings
 
 ## 1.2.2 - 2015-04-21

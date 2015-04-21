@@ -3,7 +3,7 @@
 
 
 from os import chroot
-from .cloning import *
+from . import cloning as cl
 from multiprocessing import Process
 
 
@@ -15,7 +15,7 @@ class Container(Process):
     The class is analagous to `threading.Thread`.
 
     """
-    _Popen = Clone
+    _Popen = cl.Clone
 
     def __init__(self, *args, **kwargs):
         """Set clone flags and execute Process.__init__
@@ -82,49 +82,49 @@ class Container(Process):
         self.map_zero = kwargs.pop('map_zero', False)
 
         if kwargs.pop('vm', False):
-            self.clone_flags |= CLONE_VM
+            self.clone_flags |= cl.CLONE_VM
         if kwargs.pop('fs', False):
-            self.clone_flags |= CLONE_FS
+            self.clone_flags |= cl.CLONE_FS
         if kwargs.pop('files', False):
-            self.clone_flags |= CLONE_FILES
+            self.clone_flags |= cl.CLONE_FILES
         if kwargs.pop('sighand', False):
-            self.clone_flags |= CLONE_SIGHAND
+            self.clone_flags |= cl.CLONE_SIGHAND
         if kwargs.pop('ptrace', False):
-            self.clone_flags |= CLONE_PTRACE
+            self.clone_flags |= cl.CLONE_PTRACE
         if kwargs.pop('vfork', False):
-            self.clone_flags |= CLONE_VFORK
+            self.clone_flags |= cl.CLONE_VFORK
         if kwargs.pop('parent', False):
-            self.clone_flags |= CLONE_PARENT
+            self.clone_flags |= cl.CLONE_PARENT
         if kwargs.pop('thread', False):
-            self.clone_flags |= CLONE_THREAD
+            self.clone_flags |= cl.CLONE_THREAD
         if kwargs.pop('newns', False):
-            self.clone_flags |= CLONE_NEWNS
+            self.clone_flags |= cl.CLONE_NEWNS
         if kwargs.pop('sysvsem', False):
-            self.clone_flags |= CLONE_SYSVSEM
+            self.clone_flags |= cl.CLONE_SYSVSEM
         if kwargs.pop('settls', False):
-            self.clone_flags |= CLONE_SETTLS
+            self.clone_flags |= cl.CLONE_SETTLS
         if kwargs.pop('settid', False):
-            self.clone_flags |= CLONE_PARENT_SETTID
+            self.clone_flags |= cl.CLONE_PARENT_SETTID
         if kwargs.pop('child_cleartid', False):
-            self.clone_flags |= CLONE_CHILD_CLEARTID
+            self.clone_flags |= cl.CLONE_CHILD_CLEARTID
         if kwargs.pop('detached', False):
-            self.clone_flags |= CLONE_DETACHED
+            self.clone_flags |= cl.CLONE_DETACHED
         if kwargs.pop('untraced', False):
-            self.clone_flags |= CLONE_UNTRACED
+            self.clone_flags |= cl.CLONE_UNTRACED
         if kwargs.pop('child_settid', False):
-            self.clone_flags |= CLONE_CHILD_SETTID
+            self.clone_flags |= cl.CLONE_CHILD_SETTID
         if kwargs.pop('newuts', False):
-            self.clone_flags |= CLONE_NEWUTS
+            self.clone_flags |= cl.CLONE_NEWUTS
         if kwargs.pop('newipc', False):
-            self.clone_flags |= CLONE_NEWIPC
+            self.clone_flags |= cl.CLONE_NEWIPC
         if kwargs.pop('newuser', False):
-            self.clone_flags |= CLONE_NEWUSER
+            self.clone_flags |= cl.CLONE_NEWUSER
         if kwargs.pop('newpid', False):
-            self.clone_flags |= CLONE_NEWPID
+            self.clone_flags |= cl.CLONE_NEWPID
         if kwargs.pop('newnet', False):
-            self.clone_flags |= CLONE_NEWNET
+            self.clone_flags |= cl.CLONE_NEWNET
         if kwargs.pop('io', False):
-            self.clone_flags |= CLONE_IO
+            self.clone_flags |= cl.CLONE_IO
 
         Process.__init__(self, *args, **kwargs)
 
