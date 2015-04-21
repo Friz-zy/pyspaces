@@ -1,4 +1,6 @@
 ## [Unreleased][unreleased]
+### Changed
+- docstrings
 
 ## 1.2.2 - 2015-04-21
 ### Fixed
