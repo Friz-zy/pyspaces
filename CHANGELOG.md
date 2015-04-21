@@ -1,4 +1,7 @@
 ## [Unreleased][unreleased]
+## Added
+- link to python-nsenter in readme
+
 ### Changed
 - add alisas 'mnt' for 'fs' option of cli execute
 - update importing in process.py

@@ -19,6 +19,8 @@ I think that is because there is no easy way to works with linux namespaces on p
 
 I want to change it: i want to create native python bindings to glibc with interface of python multiprocessing.Process.
 
+PS: you can look at [python-nsenter](https://github.com/zalando/python-nsenter) too, it's looks awesome.
+
 ## Example
 
 First simple example:
