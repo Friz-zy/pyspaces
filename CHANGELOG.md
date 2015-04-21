@@ -1,5 +1,6 @@
 ## [Unreleased][unreleased]
 ### Changed
+- add alisas 'mnt' for 'fs' option of cli execute
 - update importing in process.py
 - docstrings
 

@@ -67,7 +67,7 @@ def cli():
     pe.add_argument('--ipc', '-i', default=False,
         action='store_true', help='New IPC namespace'
     )
-    pe.add_argument('--fs', '-m', default=False,
+    pe.add_argument('--fs', '--mnt', '-m', default=False,
         action='store_true', help='New mount namespace'
     )
     pe.add_argument('--net', '-n', default=False,
