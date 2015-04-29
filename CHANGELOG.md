@@ -2,6 +2,7 @@
 ## Added
 - link to python-nsenter in readme
 - TODO into readme
+- discuss and link to butter in readme
 
 ### Changed
 - add alisas 'mnt' for 'fs' option of cli execute

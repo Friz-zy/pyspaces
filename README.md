@@ -6,6 +6,7 @@ Works with Linux namespaces througth glibc with pure python
 [![Downloads](https://pypip.in/download/pyspaces/badge.svg)](https://pypi.python.org/pypi/pyspaces/)
 [![Docs](https://readthedocs.org/projects/pyspaces/badge/)](https://pyspaces.readthedocs.org/en/latest/)
 
+discuss: [reddit](https://www.reddit.com/r/Python/comments/33z84l/linux_namespaces_througth_glibc_with_pure_python/), [habrahabr](http://habrahabr.ru/company/wargaming/blog/256647/)
 
 ## Goals
 
@@ -20,6 +21,8 @@ I think that is because there is no easy way to works with linux namespaces on p
 I want to change it: i want to create native python bindings to glibc with interface of python multiprocessing.Process.
 
 PS: you can look at [python-nsenter](https://github.com/zalando/python-nsenter) too, it's looks awesome.
+
+PPS: new project from author of asylum - [butter](https://pypi.python.org/pypi/butter/0.10)
 
 ## Example
 
