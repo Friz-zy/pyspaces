@@ -11,9 +11,9 @@ __license__ = "MIT"
 __maintainer__ = "Filipp Frizzy"
 __email__ = "filipp.s.frizzy@gmail.com"
 __status__ = "Development"
-__version__ = '1.2.2'
+__version__ = '1.2.3'
 
 __all__ = ["cloning", "process", "libc", "cli"]
 
 
-from .process import Container
+from .process import Container, Chroot

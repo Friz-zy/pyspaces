@@ -1,4 +1,6 @@
 ## [Unreleased][unreleased]
+
+## 1.2.3 - 2015-04-30
 ## Added
 - link to python-nsenter in readme
 - TODO into readme
@@ -76,7 +78,8 @@
 - cloning.py and process.py as first working concept
 - initial commit with necessary files
 
-[unreleased](https://github.com/Friz-zy/pyspaces/compare/v1.2.2...HEAD)
+[unreleased](https://github.com/Friz-zy/pyspaces/compare/v1.2.3...HEAD)
+[1.2.2-1.2.3](https://github.com/Friz-zy/pyspaces/compare/v1.2.2...v1.2.3)
 [1.2-1.2.2](https://github.com/Friz-zy/pyspaces/compare/v1.2...v1.2.2)
 [1.1.3-1.2](https://github.com/Friz-zy/pyspaces/compare/v1.1.3...v1.2)
 [1.1.2-1.1.3](https://github.com/Friz-zy/pyspaces/compare/v1.1.2...v1.1.3)
