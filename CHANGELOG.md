@@ -3,11 +3,13 @@
 - link to python-nsenter in readme
 - TODO into readme
 - discuss and link to butter in readme
+- additional argument 'all' in cli
 
 ### Changed
 - add alisas 'mnt' for 'fs' option of cli execute
 - update importing in process.py
 - docstrings
+- cli structure
 
 ## 1.2.2 - 2015-04-21
 ### Fixed
