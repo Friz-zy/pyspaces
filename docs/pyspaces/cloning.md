@@ -108,6 +108,15 @@ Inheritance from `multiprocessing.forking.Popen`.
   
 We define a Popen class similar to the one from subprocess, but
 whose constructor takes a process object as its argument.
+  
+Raises:    
+
+* OSError: can not execute glibc.clone function  
+
+* RuntimeError: parent doesn't close its pipe descriptor  
+
+* IOError: do not have permission to write to a file.  
+Child will be killed with signal.SIGKILL.
 
 ##### Ancestors (in MRO)
 - pyspaces.cloning.Clone
@@ -138,6 +147,10 @@ whose constructor takes a process object as its argument.
     Create a child process in new namespace(s);
 allow UID and GID mappings to be specified when
 creating a user namespace.
+  
+    Raises:    
+
+    * OSError: can not execute glibc.clone function
 
 - **child** (self)
 
@@ -147,6 +160,10 @@ creating a user namespace.
 See the comment in main(). We wait for end of file on a
 pipe that will be closed by the parent process once it has
 updated the mappings.
+  
+    Raises:    
+
+    * RuntimeError: parent doesn't close its pipe descriptor
 
 - **poll** (self, flag=1)
 
@@ -165,5 +182,10 @@ of the form:
 of course inconvenient for command-line use. Thus, we permit the
 use of commas to delimit records in this string, and replace them
 with newlines before writing the string to the file.
+  
+    Raises:    
+
+    * IOError: do not have permission to write to a file.  
+Child will be killed with signal.SIGKILL.
 
 - **wait** (self, timeout=None)

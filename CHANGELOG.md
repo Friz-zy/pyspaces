@@ -1,4 +1,7 @@
 ## [Unreleased][unreleased]
+### Changed
+- docstrings
+- error handling
 
 ## 1.2.3 - 2015-04-30
 ## Added

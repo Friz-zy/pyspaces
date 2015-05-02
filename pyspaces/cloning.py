@@ -4,6 +4,7 @@
 
 import os
 import sys
+import errno
 import signal
 from .libc import *
 try:
@@ -69,6 +70,12 @@ class Clone(Popen):
     We define a Popen class similar to the one from subprocess, but
     whose constructor takes a process object as its argument.
 
+    Raises:
+      OSError: can not execute glibc.clone function
+      RuntimeError: parent doesn't close its pipe descriptor
+      IOError: do not have permission to write to a file.
+        Child will be killed with signal.SIGKILL.
+
     """
     def __init__(self, process_obj):
         """Execute linux clone.
@@ -76,6 +83,9 @@ class Clone(Popen):
         Create a child process in new namespace(s);
         allow UID and GID mappings to be specified when
         creating a user namespace.
+
+        Raises:
+          OSError: can not execute glibc.clone function
 
         """
         sys.stdout.flush()
@@ -98,9 +108,8 @@ class Clone(Popen):
         self.pid = libc.clone(child, child_stack_pointer, flags | signal.SIGCHLD)
 
         if self.pid == -1:
-            raise RuntimeError(
-                'Can not execute clone'
-            )
+            e = ctypes.get_errno()
+            raise OSError(e, errno.errorcode[e])
 
         # Update the UID and GID maps in the child
         if uid_map or map_zero:
@@ -127,6 +136,9 @@ class Clone(Popen):
         See the comment in main(). We wait for end of file on a
         pipe that will be closed by the parent process once it has
         updated the mappings.
+
+        Raises:
+          RuntimeError: parent doesn't close its pipe descriptor
 
         """
         # Close our descriptor for the write
@@ -162,6 +174,10 @@ class Clone(Popen):
         use of commas to delimit records in this string, and replace them
         with newlines before writing the string to the file.
 
+        Raises:
+          IOError: do not have permission to write to a file.
+            Child will be killed with signal.SIGKILL.
+
         """
         #Replace commas in mapping string with newlines
         mapping = mapping.replace(',', '\n')
@@ -170,6 +186,7 @@ class Clone(Popen):
             with open(map_file, 'w') as f:
                 f.write(mapping)
         except IOError as e:
-            raise RuntimeError(
-                "Can not write %s" % map_file
+            os.kill(self.pid, signal.SIGKILL)
+            raise IOError(
+                "Can not write %s: %s\nAborting!" % (map_file, e)
             )
