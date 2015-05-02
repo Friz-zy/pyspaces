@@ -1,6 +1,12 @@
 Module pyspaces.process
 -----------------------
 
+* This is part of [pyspaces](https://github.com/Friz-zy/pyspaces)
+  
+
+* License: MIT or BSD or Apache 2.0  
+Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
+
 Classes
 -------
 #### Chroot 
@@ -58,7 +64,8 @@ The class is analagous to `threading.Thread`.
 as target with necessary args and kwargs. Then
 execute Container.__init__ with updated parameters.
   
-    Note: If the program you're trying to exec is dynamic
+    Note:    
+If the program you're trying to exec is dynamic
 linked, and the dynamic linker is not present in /lib
 in the chroot environment - you would get the
 "OSError: [Errno 2] No such file or directory" error.  
@@ -188,6 +195,9 @@ default is ""
 
     * map_zero (bool): Map user's UID and GID to 0
 in user namespace, default is False
+
+    * all (bool): set all 6 namespaces,
+default is False
 
     * vm (bool): set CLONE_VM flag,
 default is False

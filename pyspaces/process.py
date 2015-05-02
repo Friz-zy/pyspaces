@@ -36,6 +36,8 @@ class Container(Process):
             default is ""
           map_zero (bool): Map user's UID and GID to 0
             in user namespace, default is False
+          all (bool): set all 6 namespaces,
+            default is False
           vm (bool): set CLONE_VM flag,
             default is False
           fs (bool): set CLONE_FS flag,
@@ -87,6 +89,13 @@ class Container(Process):
         self.gid_map = kwargs.pop('gid_map', "")
         self.map_zero = kwargs.pop('map_zero', False)
 
+        if kwargs.pop('all', False):
+            kwargs['newipc'] = True
+            kwargs['newns'] = True
+            kwargs['newnet'] = True
+            kwargs['newpid'] = True
+            kwargs['newuser'] = True
+            kwargs['newuts'] = True
         if kwargs.pop('vm', False):
             self.clone_flags |= cl.CLONE_VM
         if kwargs.pop('fs', False):

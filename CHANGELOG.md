@@ -3,6 +3,10 @@
 - docstrings
 - error handling
 - add multilicensing: now pyspaces under MIT or BSD or Apache 2.0
+- up cli and example in readme
+
+## Added
+- 'all' argument into Container.__init__
 
 ## 1.2.3 - 2015-04-30
 ## Added

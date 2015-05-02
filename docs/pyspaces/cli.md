@@ -1,6 +1,12 @@
 Module pyspaces.cli
 -------------------
 
+* This is part of [pyspaces](https://github.com/Friz-zy/pyspaces)
+  
+
+* License: MIT or BSD or Apache 2.0  
+Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
+
 Functions
 ---------
 - **chroot** (args, argv)
@@ -15,6 +21,7 @@ and GID mappings to be specified when creating a user namespace.
   
     Analog of chroot program.
   
+    
     Note: If the program you're trying to exec is dynamic
 linked, and the dynamic linker is not present in /lib
 in the chroot environment - you would get the

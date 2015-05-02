@@ -40,7 +40,7 @@ def cli():
         action='store_true', help='New IPC namespace'
     )
     p_mount = argparse.ArgumentParser(add_help=False)
-    p_mount.add_argument('--fs', '--mnt', '-m', default=False,
+    p_mount.add_argument('--mnt', '--fs', '-m', default=False,
         action='store_true', help='New mount namespace'
     )
     p_net = argparse.ArgumentParser(add_help=False)
@@ -101,7 +101,7 @@ def cli():
         parents=[p_main, p_argv,
             p_all, p_uid, p_gid, p_id,
             p_ipc, p_mount, p_net,
-            p_pid, p_uts, p_user,
+            p_pid, p_user, p_uts,
         ],
         help='Run program in new namespaces.'
     )
@@ -123,18 +123,12 @@ def execute(args, argv):
 
     """
     argv.insert(0, args.argv)
-    if args.all:
-        args.pid = True
-        args.user = True
-        args.fs = True
-        args.uts = True
-        args.ipc = True
-        args.net = True
-
     c = Container(target=os.execvp, args=(argv[0], argv),
               uid_map=args.uid, gid_map=args.gid, map_zero=args.id,
-              newpid=args.pid, newuser=args.user, newns=args.fs,
-              newuts=args.uts, newipc=args.ipc, newnet=args.net)
+              newpid=args.pid, newuser=args.user, newns=args.mnt,
+              newuts=args.uts, newipc=args.ipc, newnet=args.net,
+              all=args.all
+    )
     c.start()
     if args.verbose:
         print("PID of child created by clone() is %ld\n" % c.pid)
@@ -165,18 +159,11 @@ def chroot(args, argv):
 
     """
     argv.insert(0, args.argv)
-    if args.all:
-        args.pid = True
-        args.user = True
-        args.fs = True
-        args.uts = True
-        args.ipc = True
-        args.net = True
-
     c = Chroot(path=args.path, target=os.execvp,
-              args=(argv[0], argv), newpid=args.pid,
+              args=(argv[0], argv), all=args.all, newpid=args.pid,
               uid_map=args.uid, gid_map=args.gid, map_zero=args.id,
-              newuts=args.uts, newipc=args.ipc, newnet=args.net)
+              newuts=args.uts, newipc=args.ipc, newnet=args.net
+    )
     c.start()
     if args.verbose:
         print("PID of child created by clone() is %ld\n" % c.pid)
