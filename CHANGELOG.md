@@ -1,5 +1,6 @@
 ## [Unreleased][unreleased]
-### Changed
+
+## 1.2.4 - 2015-05-02
 - docstrings
 - error handling
 - add multilicensing: now pyspaces under MIT or BSD or Apache 2.0
@@ -86,7 +87,8 @@
 - cloning.py and process.py as first working concept
 - initial commit with necessary files
 
-[unreleased](https://github.com/Friz-zy/pyspaces/compare/v1.2.3...HEAD)
+[unreleased](https://github.com/Friz-zy/pyspaces/compare/v1.2.4...HEAD)
+[1.2.3-1.2.4](https://github.com/Friz-zy/pyspaces/compare/v1.2.3...v1.2.4)
 [1.2.2-1.2.3](https://github.com/Friz-zy/pyspaces/compare/v1.2.2...v1.2.3)
 [1.2-1.2.2](https://github.com/Friz-zy/pyspaces/compare/v1.2...v1.2.2)
 [1.1.3-1.2](https://github.com/Friz-zy/pyspaces/compare/v1.1.3...v1.2)
