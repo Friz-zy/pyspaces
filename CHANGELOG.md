@@ -1,4 +1,7 @@
 ## [Unreleased][unreleased]
+## Fixed
+- error handling with ctypes in cloning.py
+
 
 ## 1.2.4 - 2015-05-02
 - docstrings

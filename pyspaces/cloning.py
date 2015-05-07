@@ -114,8 +114,8 @@ class Clone(Popen):
         self.pid = libc.clone(child, child_stack_pointer, flags | signal.SIGCHLD)
 
         if self.pid == -1:
-            e = ctypes.get_errno()
-            raise OSError(e, errno.errorcode[e])
+            e = get_errno()
+            raise OSError(e, os.strerror(e))
 
         # Update the UID and GID maps in the child
         if uid_map or map_zero:
