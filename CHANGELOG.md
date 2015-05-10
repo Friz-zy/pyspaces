@@ -1,7 +1,10 @@
 ## [Unreleased][unreleased]
+## Added
+- setns.py with setns context manager
+- args_aliases.py with dicts of possible additional arguments for many cases
+
 ## Fixed
 - error handling with ctypes in cloning.py
-
 
 ## 1.2.4 - 2015-05-02
 - docstrings
