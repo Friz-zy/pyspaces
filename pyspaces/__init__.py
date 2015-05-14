@@ -19,7 +19,8 @@ __email__ = "filipp.s.frizzy@gmail.com"
 __status__ = "Development"
 __version__ = '1.2.4'
 
-__all__ = ["cloning", "process", "libc", "cli"]
+__all__ = ["cloning", "process", "libc", "cli", "setns", "args_aliases"]
 
 
-from .process import Container, Chroot
+from .process import Container, Chroot, Inject
+from .setns import setns

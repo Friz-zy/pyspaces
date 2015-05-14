@@ -109,7 +109,7 @@ ca = {
 def pop(arg, args=(), kwargs={}, default=False):
     """Check if key in args or kwargs.
 
-    If key is in the dictionary, remove it
+    If key is in args or kwargs, remove it
     and return its value or True,
     else return default.
 
@@ -138,7 +138,7 @@ def pop(arg, args=(), kwargs={}, default=False):
 def pop_all(aliases, args=(), kwargs={}, default=False):
     """Check if keys in args or kwargs.
 
-    If key is in the dictionary, remove it
+    If keys is in args or kwargs, remove it
     and return its value or True,
     else return default.
 

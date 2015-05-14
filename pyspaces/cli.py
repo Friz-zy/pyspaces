@@ -11,7 +11,7 @@ Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
 import os
 import argparse
 from . import __version__
-from .process import Container, Chroot
+from .process import Container, Chroot, Inject
 
 
 def cli():
@@ -106,6 +106,27 @@ def cli():
         help='Run program in new namespaces.'
     )
     pe.set_defaults(func=execute)
+    # inject
+    pe = subps.add_parser('inject', add_help=False,
+        parents=[p_main, p_all,
+            p_ipc, p_mount, p_net,
+            p_pid, p_user, p_uts,
+            p_uid, p_gid, p_id,
+        ],
+        help='Run program in namespaces of another process.'
+    )
+    pe.add_argument('target_pid',
+        help='Pid of target process.',
+    )
+    # add argv not as parent parser because of
+    # sequence of positional args
+    pe.add_argument('argv',
+        help='Command with args for executing.',
+    )
+    pe.add_argument('--proc', default='/proc',
+        help='root directory of proc fs.',
+    )
+    pe.set_defaults(func=inject)
 
     args, extra = p_case.parse_known_args()
     args.func(args, extra)
@@ -163,6 +184,28 @@ def chroot(args, argv):
               args=(argv[0], argv), all=args.all, newpid=args.pid,
               uid_map=args.uid, gid_map=args.gid, map_zero=args.id,
               newuts=args.uts, newipc=args.ipc, newnet=args.net
+    )
+    c.start()
+    if args.verbose:
+        print("PID of child created by clone() is %ld\n" % c.pid)
+    c.join()
+    if args.verbose:
+        print("Child returned: pid %s, status %s" % (c.pid, c.exitcode))
+
+def inject(args, argv):
+    """Run program in namespaces of another process.
+
+    $ space inject --all 12603 bash
+
+    Create a child process that executes a shell command in
+    namespace(s) of another process.
+
+    """
+    argv.insert(0, args.argv)
+    c = Inject(target=os.execvp, args=(argv[0], argv),
+              newpid=args.pid, newuser=args.user, newns=args.mnt,
+              newuts=args.uts, newipc=args.ipc, newnet=args.net,
+              all=args.all, target_pid=args.target_pid, proc=args.proc
     )
     c.start()
     if args.verbose:

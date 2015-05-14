@@ -9,8 +9,10 @@ Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
 
 
 from os import chroot
+from .setns import setns
 from . import cloning as cl
 from multiprocessing import Process
+from .args_aliases import na, ca, pop, pop_all
 
 
 class Container(Process):
@@ -174,8 +176,10 @@ class Chroot(Container):
           path (str): path to chroot new root
           target (python function): python function
             for executing after chroot
-          args (list): args for target
-          kwargs (dict): kwargs for target
+          args (list): args for target,
+            default is ()
+          kwargs (dict): kwargs for target,
+            default is {}
           *cargs (list): arguments for Container.__init__
           **ckwargs (dict): arguments for Container.__init__
 
@@ -200,9 +204,85 @@ class Chroot(Container):
           path (str): path to chroot new root
           target (python function): python function
             for executing after chroot
-          args (list): args for target
-          kwargs (dict): kwargs for target
+          args (list): args for target,
+            default is ()
+          kwargs (dict): kwargs for target,
+            default is {}
 
         """
         chroot(path)
         return target(*args, **kwargs)
+
+class Inject(Container):
+    """Class wrapper over `multiprocessing.Process`.
+
+    Create process in namespaces of another one.
+
+    The class is analagous to `threading.Thread`.
+
+    """
+    def __init__(self, target_pid, target, args=(), kwargs={}, proc='/proc', *pargs, **pkwargs):
+        """Set new namespaces and execute Process.__init__
+
+        Set self.setns as target with necessary args and kwargs.
+        Then execute Process.__init__ with updated parameters.
+
+
+        Args:
+          pid (str or int): pid of target process
+          target (python function): python function
+            for executing
+          args (list): args for target,
+            default is ()
+          kwargs (dict): kwargs for target,
+            default is {}
+          proc (str): root directory of proc fs,
+            default is '/proc'
+          *pargs (list): arguments for Container.__init__
+          **pkwargs (dict): arguments for Container.__init__
+
+        In args or kwargs expected one or many of
+        many keys for setns:
+        'all', 'ipc', 'newipc', 'mnt', 'newns',
+        'net', 'newnet', 'pid', 'newpid',
+        'user', 'newuser', 'uts', 'newuts'.
+        If no one of them submitted 'all' will
+        be used.
+
+        """
+        nspaces = []
+        # all as default
+        if 'all' in pargs or ('all' in pkwargs and pkwargs['all']):
+            nspaces.append('all')
+        for ns in na:
+            for a in na[ns]['aliases']:
+                if a in args or (a in pkwargs and pkwargs[a]):
+                    nspaces.append(ns)
+
+        pkwargs['args'] = ()
+        pkwargs['kwargs'] = {
+            'pid': target_pid, 'target': target,
+            'args': args, 'kwargs': kwargs,
+            'nspaces': nspaces, 'proc': proc,
+        }
+        pkwargs['target'] = self.setns
+        Container.__init__(self, *pargs, **pkwargs)
+
+    def setns(self, pid, target, args=(), kwargs={}, nspaces=[], proc='/proc'):
+        """Change namespaces and execute target.
+
+        Args:
+          path (str): path to chroot new root
+          target (python function): python function
+            for executing after chroot
+          args (list): args for target,
+            default is ()
+          kwargs (dict): kwargs for target,
+            default is {}
+          nspaces (list): list of namespaces for setns
+          proc (str): root directory of proc fs,
+            default is '/proc'
+
+        """
+        with setns(pid, proc, *nspaces):
+            return target(*args, **kwargs)
