@@ -9,7 +9,8 @@ Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
 
 
 import errno
-from .libc import libc
+from os import getpid
+from .libc import libc, get_errno
 from .args_aliases import na
 from contextlib import contextmanager
 
@@ -39,7 +40,8 @@ def setns(pid, proc='/proc', *args, **kwargs):
         all_ns = True
     else:
         all_ns = False
-    fdtmp = '{proc}/{pid}/ns/{ns}'
+    #'{proc}/{pid}/ns/{ns}'
+    fdtmp = '{0}/{1}/ns/{2}'
     try:
         for k in na:
             for a in na[k]['aliases']:
@@ -50,9 +52,9 @@ def setns(pid, proc='/proc', *args, **kwargs):
                     break
         yield
     except:
-        e = ctypes.get_errno()
+        e = get_errno()
         raise OSError(e, errno.errorcode[e])
     finally:
         for k in na:
-            with open(fdtmp.format(proc, os.getpid(), k)) as f:
+            with open(fdtmp.format(proc, getpid(), k)) as f:
                 libc.setns(f.fileno(), na[k]['flag'])
