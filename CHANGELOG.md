@@ -1,4 +1,7 @@
 ## [Unreleased][unreleased]
+## Fixed
+- docstrings
+- readme
 
 ## 1.3 - 2015-05-15
 ## Added

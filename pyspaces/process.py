@@ -229,7 +229,7 @@ class Inject(Container):
 
 
         Args:
-          pid (str or int): pid of target process
+          target_pid (str or int): pid of target process
           target (python function): python function
             for executing
           args (list): args for target,
