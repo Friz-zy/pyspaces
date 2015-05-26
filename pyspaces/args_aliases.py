@@ -9,33 +9,38 @@ Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
 
 
 from . import cloning as cl 
+from collections import OrderedDict
 
 
-na = {
-    'ipc': {
-        'aliases': ['ipc', 'newipc'],
-        'flag': cl.CLONE_NEWIPC
-    },
-    'mnt': {
-        'aliases': ['mnt', 'newns'],
-        'flag': cl.CLONE_NEWNS
-    },
-    'net': {
-        'aliases': ['net', 'newnet'],
-        'flag': cl.CLONE_NEWNET
-    },
-    'pid': {
-        'aliases': ['pid', 'newpid'],
-        'flag': cl.CLONE_NEWPID
-    },
-    'user': {
-        'aliases': ['user', 'newuser'],
-        'flag': cl.CLONE_NEWUSER
-    },
-    'uts': {
-        'aliases': ['uts', 'newuts'],
-        'flag': cl.CLONE_NEWUTS
-    },
+# Careful the order is significant in this array.
+# The user namespace comes first, so that it is entered
+# first.  This gives an unprivileged user the potential to
+# enter the other namespaces.
+# via src of nsenter util
+na = OrderedDict()
+na['user'] = {
+    'aliases': ['user', 'newuser'],
+    'flag': cl.CLONE_NEWUSER
+}
+na['ipc'] = {
+    'aliases': ['ipc', 'newipc'],
+    'flag': cl.CLONE_NEWIPC
+}
+na['uts'] = {
+    'aliases': ['uts', 'newuts'],
+    'flag': cl.CLONE_NEWUTS
+}
+na['net'] = {
+    'aliases': ['net', 'newnet'],
+    'flag': cl.CLONE_NEWNET
+}
+na['pid'] = {
+    'aliases': ['pid', 'newpid'],
+    'flag': cl.CLONE_NEWPID
+}
+na['mnt'] = {
+    'aliases': ['mnt', 'newns'],
+    'flag': cl.CLONE_NEWNS
 }
 
 ca = {
