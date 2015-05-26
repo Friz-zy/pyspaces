@@ -1,4 +1,6 @@
 ## [Unreleased][unreleased]
+
+## 1.3.1 - 2015-05-26
 ## Fixed
 - order of namespaces in args_aliases: it's important for setns! via src of nsenter
 - docstrings
@@ -101,7 +103,8 @@
 - cloning.py and process.py as first working concept
 - initial commit with necessary files
 
-[unreleased](https://github.com/Friz-zy/pyspaces/compare/v1.3...HEAD)
+[unreleased](https://github.com/Friz-zy/pyspaces/compare/v1.3.1...HEAD)
+[1.3-1.3.1](https://github.com/Friz-zy/pyspaces/compare/v1.3...v1.3.1)
 [1.2.4-1.3](https://github.com/Friz-zy/pyspaces/compare/v1.2.4...v1.3)
 [1.2.3-1.2.4](https://github.com/Friz-zy/pyspaces/compare/v1.2.3...v1.2.4)
 [1.2.2-1.2.3](https://github.com/Friz-zy/pyspaces/compare/v1.2.2...v1.2.3)
