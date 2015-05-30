@@ -1,32 +1,40 @@
 ## [Unreleased][unreleased]
+### Added
+- get, get_all functions into args_aliases.py
+- processing of different types of values for uid_map and gid_map agrguments
+- dummy functions to Process
+
+### Changed
+- processing of args and kwargs in Process.__init__
 
 ## 1.3.1 - 2015-05-26
-## Fixed
+### Fixed
 - order of namespaces in args_aliases: it's important for setns! via src of nsenter
 - docstrings
 - readme
 
 ## 1.3 - 2015-05-15
-## Added
+### Added
 - setns.py with setns context manager
 - args_aliases.py with dicts of possible additional arguments for many cases
 - Inject class and cli
 
-## Fixed
+### Fixed
 - error handling with ctypes in cloning.py
 - setns
 
 ## 1.2.4 - 2015-05-02
+### Fixed
 - docstrings
 - error handling
 - add multilicensing: now pyspaces under MIT or BSD or Apache 2.0
 - up cli and example in readme
 
-## Added
+### Added
 - 'all' argument into Container.__init__
 
 ## 1.2.3 - 2015-04-30
-## Added
+### Added
 - link to python-nsenter in readme
 - TODO into readme
 - discuss and link to butter in readme

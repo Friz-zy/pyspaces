@@ -111,6 +111,59 @@ ca = {
 }
 
 
+def get(arg, args=(), kwargs={}, default=False):
+    """Check if key in args or kwargs.
+
+    If key is in args or kwargs,
+    return its value or True,
+    else return default.
+
+    Args:
+      arg (any): key for search
+      args (list): list for search
+      kwargs (dict): dict for search
+      default (any): default value,
+        default is False
+
+    Return:
+      Value if arg is key for kwargs
+      True if arg in args
+      default if arg not in args or kwargs
+
+    """
+    if arg in kwargs:
+        return kwargs[arg]
+    elif arg in args:
+        return True
+    return default
+
+def get_all(aliases, args=(), kwargs={}, default=False):
+    """Check if keys in args or kwargs.
+
+    If keys is in args or kwargs,
+    return its first exist alias value
+    or True, else return default.
+
+    Args:
+      aliases (any iterable): keys for search
+      args (list): list for search
+      kwargs (dict): dict for search
+      default (any): default value,
+        default is False
+
+    Return:
+      Value if any key is key for kwargs
+      True if any key in args
+      default if arg not in args or kwargs
+
+    """
+    for arg in aliases:
+        if arg in kwargs:
+            return kwargs[arg]
+        elif arg in args:
+            return True
+    return default
+
 def pop(arg, args=(), kwargs={}, default=False):
     """Check if key in args or kwargs.
 

@@ -8,11 +8,12 @@ Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
 """
 
 
-from os import chroot
 from .setns import setns
 from . import cloning as cl
+from os import chroot, chdir
+from inspect import getargspec
 from multiprocessing import Process
-from .args_aliases import na, ca, pop, pop_all
+from .args_aliases import na, ca, get, get_all, pop, pop_all
 
 
 class Container(Process):
@@ -32,9 +33,21 @@ class Container(Process):
           *args (list): arguments for Process.__init__
           **kwargs (dict): arguments for Process.__init__
           flags (int): flags for clone, default is 0
-          uid_map (str): UID mapping for new namespace,
+          uid_map (bool, int, str, list): UID mapping
+            for new namespace:
+            bool: map current uid as root
+            int: map given uid as root
+            str: like int or in format
+            ' '.join((<start uid in new ns>,
+                      <start uid in current ns>,
+                      <range to mapping>
+            )). Example "0 1000 1" will map 1000 uid as root,
+            "0 1000 1,1 1001 1" or "1000,1001"
+            will map 1000 as root and 1001 as uid 1.
+            list: list of int or str
             default is ""
-          gid_map (str): GID mapping for new namespace,
+          gid_map (bool, int, str, list): GID mapping
+            for new namespace, format the same as uid_map,
             default is ""
           map_zero (bool): Map user's UID and GID to 0
             in user namespace, default is False
@@ -86,64 +99,122 @@ class Container(Process):
             default is False
 
         """
-        self.clone_flags = kwargs.pop('flags', 0)
-        self.uid_map = kwargs.pop('uid_map', "")
-        self.gid_map = kwargs.pop('gid_map', "")
-        self.map_zero = kwargs.pop('map_zero', False)
+        self.args = args
+        self.kwargs = kwargs
 
-        if kwargs.pop('all', False):
+        # 1) clear args and move all to kwargs +
+        # 2) change target to self.runup +
+        # 3) functions for *id maps
+        # 4) ns in (bool, file, fd)
+        # 5) works with kwargs with get
+
+        self.clone_flags = get('flags', (), kwargs, 0)
+        self.uid_map = pop('uid_map', args, kwargs, "")
+        self.gid_map = pop('gid_map', args, kwargs, "")
+        self.map_zero = pop('map_zero', args, kwargs, False)
+
+        # clear args and move all specific args to kwargs
+        value = pop('all', args, kwargs, False)
+        if value:
+            kwargs['all'] = value
             kwargs['newipc'] = True
             kwargs['newns'] = True
             kwargs['newnet'] = True
             kwargs['newpid'] = True
             kwargs['newuser'] = True
             kwargs['newuts'] = True
-        if kwargs.pop('vm', False):
-            self.clone_flags |= cl.CLONE_VM
-        if kwargs.pop('fs', False):
-            self.clone_flags |= cl.CLONE_FS
-        if kwargs.pop('files', False):
-            self.clone_flags |= cl.CLONE_FILES
-        if kwargs.pop('sighand', False):
-            self.clone_flags |= cl.CLONE_SIGHAND
-        if kwargs.pop('ptrace', False):
-            self.clone_flags |= cl.CLONE_PTRACE
-        if kwargs.pop('vfork', False):
-            self.clone_flags |= cl.CLONE_VFORK
-        if kwargs.pop('parent', False):
-            self.clone_flags |= cl.CLONE_PARENT
-        if kwargs.pop('thread', False):
-            self.clone_flags |= cl.CLONE_THREAD
-        if kwargs.pop('newns', False):
-            self.clone_flags |= cl.CLONE_NEWNS
-        if kwargs.pop('sysvsem', False):
-            self.clone_flags |= cl.CLONE_SYSVSEM
-        if kwargs.pop('settls', False):
-            self.clone_flags |= cl.CLONE_SETTLS
-        if kwargs.pop('settid', False):
-            self.clone_flags |= cl.CLONE_PARENT_SETTID
-        if kwargs.pop('child_cleartid', False):
-            self.clone_flags |= cl.CLONE_CHILD_CLEARTID
-        if kwargs.pop('detached', False):
-            self.clone_flags |= cl.CLONE_DETACHED
-        if kwargs.pop('untraced', False):
-            self.clone_flags |= cl.CLONE_UNTRACED
-        if kwargs.pop('child_settid', False):
-            self.clone_flags |= cl.CLONE_CHILD_SETTID
-        if kwargs.pop('newuts', False):
-            self.clone_flags |= cl.CLONE_NEWUTS
-        if kwargs.pop('newipc', False):
-            self.clone_flags |= cl.CLONE_NEWIPC
-        if kwargs.pop('newuser', False):
-            self.clone_flags |= cl.CLONE_NEWUSER
-        if kwargs.pop('newpid', False):
-            self.clone_flags |= cl.CLONE_NEWPID
-        if kwargs.pop('newnet', False):
-            self.clone_flags |= cl.CLONE_NEWNET
-        if kwargs.pop('io', False):
-            self.clone_flags |= cl.CLONE_IO
 
+        for ns in na:
+            value = pop_all(na[ns]['aliases'],
+                            args, kwargs, False)
+            if value:
+                kwargs[na[ns]['aliases'][0]] = value
+                # set clone flags
+                self.clone_flags |= na[ns]['flag']
+
+        for flag in ca:
+            value = pop_all(ca[flag]['aliases'],
+                            args, kwargs, False)
+            if value:
+                kwargs[ca[flag]['aliases'][0]] = value
+                # set clone flags
+                self.clone_flags |= ca[flag]['flag']
+
+        kwargs = {}
+        for k in getargspec(Process.__init__).args:
+            if k in self.kwargs:
+                kwargs[k] = self.kwargs[k]
+        #kwargs['target'] = self.runup
+        #kwargs['args'] = ()
+        #kwargs['kwargs'] = {}
         Process.__init__(self, *args, **kwargs)
+
+    def runup(self):
+        """Main wrapper over target function.
+
+        0) ns and sigmask
+        1) preup
+        2.1) change context: apparmor
+        2.2) change context: selinux
+        2.3) change context: nsenter
+        3) std* ?vagga до ns
+        4) chroot
+        5) chdir
+        6) setuid    ??
+        7) networking
+        8) postup
+        9) preexec
+        10) exec
+        11) postexec
+
+        https://github.com/coreos/rkt/blob/master/Documentation/devel/architecture.md
+        https://github.com/coreos/rkt/blob/master/Documentation/devel/stage1-implementors-guide.md
+
+        """
+        pass
+
+    def chroot(self):
+        """Change root with os.chroot.
+
+        Change current directory to chroot,
+        then execute chroot and then again
+        change current directory back.
+
+        Requared self.chroot or
+        self.kwargs['chroot'].
+
+        """
+        pass
+
+    def chdir(self):
+        """Change working dir with os.chdir.
+
+        Change current directory to new
+
+        Requared self.workdir or
+        self.kwargs['workdir'].
+
+        """
+        pass
+
+    def networking(self):
+        """https://github.com/coreos/rkt/blob/master/Documentation/networking.md"""
+        pass
+
+    def nsenter(self):
+        pass
+
+    def preup(self):
+        pass
+
+    def postup(self):
+        pass
+
+    def preexec(self):
+        pass
+
+    def postexec(self):
+        pass
 
 class Chroot(Container):
     """Class wrapper over `pyspaces.Container`.

@@ -118,16 +118,43 @@ class Clone(Popen):
             raise OSError(e, os.strerror(e))
 
         # Update the UID and GID maps in the child
+        def arg2map(arg):
+            #    int: map given uid to root
+            #    str: like int or in format
+            #    ' '.join((<start uid in new ns>,
+            #              <start uid in current ns>,
+            #              <range to mapping>
+            #    )). Example "0 1000 1" will map 1000 uid as root,
+            #    "0 1000 1,1 1001 1" will map also 1001 as uid 1.
+            #    list: list of int or str
+            if type(arg) is int:
+                return "0 %d 1" % arg
+            if not hasattr(arg, '__iter__'):
+                arg = arg.split(',')
+            if ' ' not in arg[0]:
+                arg = ['%d %s 1' % (i, d) for i, d in enumerate(arg)]
+            return '\n'.join(arg)
+
         if uid_map or map_zero:
             map_path = "/proc/%s/uid_map" % self.pid
-            if map_zero:
-                uid_map = "0 %d 1" % os.getuid()  
+            if map_zero or type(uid_map) is bool:
+                uid_map = "0 %d 1" % os.getuid()
+            else:
+                uid_map = arg2map(uid_map)
             self.update_map(uid_map, map_path)
 
         if gid_map or map_zero:
+            # Writing "deny" to the /proc/[pid]/setgroups file before writing to
+            # /proc/[pid]/gid_map will permanently disable setgroups(2) in a user
+            # namespace and allow writing to /proc/[pid]/gid_map without having the
+            # CAP_SETGID capability in the parent user namespace.
+            with open("/proc/%s/setgroups" % self.pid, 'w') as f:
+                f.write("deny")
             map_path = "/proc/%s/gid_map" % self.pid
-            if map_zero:
-                gid_map = "0 %d 1" % os.getgid() 
+            if map_zero or type(gid_map) is bool:
+                gid_map = "0 %d 1" % os.getgid()
+            else:
+                gid_map = arg2map(gid_map)
             self.update_map(gid_map, map_path)
 
         # Close the write end of the pipe, to signal to the child that we
