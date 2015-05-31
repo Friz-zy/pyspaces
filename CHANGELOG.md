@@ -3,9 +3,14 @@
 - get, get_all functions into args_aliases.py
 - processing of different types of values for uid_map and gid_map agrguments
 - dummy functions to Process
+- contexter as required package
+- target_pid, proc, rootdir, workdir arguments into Process.__init__
+- runup, preup, nsenter, chtty, chroot, chdir, networking, postup, preexec, postexec functions into Process
+- proc variable into Clone and Process
 
 ### Changed
 - processing of args and kwargs in Process.__init__
+- Inject and Chroot classes now based on Container and deprecated
 
 ## 1.3.1 - 2015-05-26
 ### Fixed

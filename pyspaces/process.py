@@ -10,9 +10,10 @@ Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
 
 from .setns import setns
 from . import cloning as cl
-from os import chroot, chdir
 from inspect import getargspec
+from contexter import Contexter
 from multiprocessing import Process
+from os import chroot, chdir, getcwd
 from .args_aliases import na, ca, get, get_all, pop, pop_all
 
 
@@ -51,7 +52,28 @@ class Container(Process):
             default is ""
           map_zero (bool): Map user's UID and GID to 0
             in user namespace, default is False
+          target_pid (str or int): pid of target process,
+            used for executing setns
+          proc (str): root directory of proc fs,
+            default is '/proc'
+          rootdir (str): path to root, default is '/'
+          workdir (str): path to working dir,
+            default is os.getcwd();
+            if you set new rootdir, workdir
+            path should be in new root tree
           all (bool): set all 6 namespaces,
+            default is False
+          newuts (bool): set CLONE_NEWUTS flag,
+            default is False
+          newipc (bool): set CLONE_NEWIPC flag,
+            default is False
+          newuser (bool): set CLONE_NEWUSER flag,
+            default is False
+          newpid (bool): set CLONE_NEWPID flag,
+            default is False
+          newnet (bool): set CLONE_NEWNET flag,
+            default is False
+          newns (bool): set CLONE_NEWNS flag,
             default is False
           vm (bool): set CLONE_VM flag,
             default is False
@@ -69,8 +91,6 @@ class Container(Process):
             default is False
           thread (bool): set CLONE_THREAD flag,
             default is False
-          newns (bool): set CLONE_NEWNS flag,
-            default is False
           sysvsem (bool): set CLONE_SYSVSEM flag,
             default is False
           settls (bool): set CLONE_SETTLS flag,
@@ -85,16 +105,6 @@ class Container(Process):
             default is False
           child_settid (bool): set CLONE_CHILD_SETTID flag,
             default is False
-          newuts (bool): set CLONE_NEWUTS flag,
-            default is False
-          newipc (bool): set CLONE_NEWIPC flag,
-            default is False
-          newuser (bool): set CLONE_NEWUSER flag,
-            default is False
-          newpid (bool): set CLONE_NEWPID flag,
-            default is False
-          newnet (bool): set CLONE_NEWNET flag,
-            default is False
           io (bool): set CLONE_IO flag,
             default is False
 
@@ -108,10 +118,15 @@ class Container(Process):
         # 4) ns in (bool, file, fd)
         # 5) works with kwargs with get
 
-        self.clone_flags = get('flags', (), kwargs, 0)
+        self.clone_flags = kwargs.get('flags', 0)
         self.uid_map = pop('uid_map', args, kwargs, "")
         self.gid_map = pop('gid_map', args, kwargs, "")
         self.map_zero = pop('map_zero', args, kwargs, False)
+        self.proc = kwargs.get('proc', '/proc')
+
+        self.kwargs['target_pid'] = kwargs.get('target_pid', 0)
+        self.kwargs['rootdir'] = kwargs.get('rootdir', '/')
+        self.kwargs['workdir'] = kwargs.get('workdir', getcwd())
 
         # clear args and move all specific args to kwargs
         value = pop('all', args, kwargs, False)
@@ -144,80 +159,139 @@ class Container(Process):
         for k in getargspec(Process.__init__).args:
             if k in self.kwargs:
                 kwargs[k] = self.kwargs[k]
-        #kwargs['target'] = self.runup
-        #kwargs['args'] = ()
-        #kwargs['kwargs'] = {}
+        kwargs['target'] = self.runup
+        kwargs['args'] = ()
+        kwargs['kwargs'] = {}
         Process.__init__(self, *args, **kwargs)
 
     def runup(self):
         """Main wrapper over target function.
 
-        0) ns and sigmask
-        1) preup
-        2.1) change context: apparmor
-        2.2) change context: selinux
-        2.3) change context: nsenter
-        3) std* ?vagga до ns
-        4) chroot
-        5) chdir
-        6) setuid    ??
-        7) networking
-        8) postup
-        9) preexec
-        10) exec
-        11) postexec
+        TODO:
+          0.1) [x] new ns and sigmask (Clone)
+          0.2) [x] set uid, gid (Clone)
+          0.3) open Contexter context manager as ctx
+          1) [x] self.preup
+          2.1) [ ] change context - apparmor
+          2.2) [ ] change context - selinux
+          2.3) [ ] change context - self.nsenter
+          2.4) [ ] change context - self.chtty ?vagga before ns
+          3) [x] self.chroot
+          4) [x] self.chdir
+          5) [x] self.networking
+          6) [x] self.postup - in finally block
+          7) [x] self.preexec
+          8) [x] execute self.target
+          9) [x] self.postexec - in finally block
 
-        https://github.com/coreos/rkt/blob/master/Documentation/devel/architecture.md
-        https://github.com/coreos/rkt/blob/master/Documentation/devel/stage1-implementors-guide.md
+        Required:
+          self.kwargs['target']
+          self.kwargs['args']
+          self.kwargs['kwargs']
+
+        Return:
+          int: return of target function
+            or 0 if no one exception was
+            raised
+
+        Raise:
+          any exception
 
         """
+        with Contexter() as self.ctx:
+            try:
+                self.preup()
+                self.nsenter()
+                self.chtty()
+                self.chroot()
+                self.chdir()
+                self.networking()
+            finally:
+                self.postup()
+            try:
+                self.preexec()
+                return_value = self.kwargs['target'](
+                    *self.kwargs['args'],
+                    **self.kwargs['kwargs']
+                ) or 0
+            finally:
+                self.postexec()
+        return return_value
+
+    def preup(self):
+        """Dummy function."""
+        pass
+
+    def nsenter(self):
+        """Change current namespaces to pid namespaces.
+
+        Required:
+          self.kwargs['target_pid']
+
+        Uses:
+          'all' or any of ns arguments
+          self.proc
+
+          """
+        if self.kwargs['target_pid']:
+            self.ctx.append(setns(
+                self.kwargs['target_pid'],
+                self.proc, **self.kwargs)
+            )
+
+    def chtty(self):
         pass
 
     def chroot(self):
         """Change root with os.chroot.
 
-        Change current directory to chroot,
+        Change working directory to rootdir,
         then execute chroot and then again
-        change current directory back.
+        change working dir to workdir.
 
-        Requared self.chroot or
-        self.kwargs['chroot'].
+        Required:
+          self.kwargs['rootdir']
+          self.kwargs['workdir']
 
         """
-        pass
+        if self.kwargs['rootdir'] != '/':
+            chdir(self.kwargs['rootdir'])
+            chroot(self.kwargs['rootdir'])
+            chdir(self.kwargs['workdir'])
 
     def chdir(self):
         """Change working dir with os.chdir.
 
         Change current directory to new
 
-        Requared self.workdir or
-        self.kwargs['workdir'].
+        Required:
+          self.kwargs['workdir'].
 
         """
-        pass
+        if self.kwargs['workdir'] != getcwd():
+            chdir(self.kwargs['workdir'])
 
     def networking(self):
-        """https://github.com/coreos/rkt/blob/master/Documentation/networking.md"""
-        pass
-
-    def nsenter(self):
-        pass
-
-    def preup(self):
+        """Dummy function."""
         pass
 
     def postup(self):
+        """Dummy function."""
         pass
 
     def preexec(self):
+        """Dummy function."""
         pass
 
     def postexec(self):
+        """Dummy function."""
         pass
 
 class Chroot(Container):
     """Class wrapper over `pyspaces.Container`.
+
+    Deprecated since 1.4! Use Container with rootdir,
+    workdir, newuser and newns arguments.
 
     Chroot objects represent activity that is run in a separate process
     in new filesystem and user namespaces.
@@ -257,42 +331,26 @@ class Chroot(Container):
         """
         ckwargs['args'] = ()
         ckwargs['kwargs'] = {
-            'path': path, 'target': target,
+            'rootdir': path, 'target': target,
+            'workdir': ckwargs.get('workdir', path),
             'args': args, 'kwargs': kwargs
         }
-        ckwargs['target'] = self.chroot
         ckwargs['newuser'] = True
         ckwargs['newns'] = True
         Container.__init__(self, *cargs, **ckwargs)
 
-    def chroot(self, path, target, args=(), kwargs={}):
-        """Change root and execute target.
-
-        Change root with os.chroot. Then execute
-        target with args and kwargs.
-
-        Args:
-          path (str): path to chroot new root
-          target (python function): python function
-            for executing after chroot
-          args (list): args for target,
-            default is ()
-          kwargs (dict): kwargs for target,
-            default is {}
-
-        """
-        chroot(path)
-        return target(*args, **kwargs)
-
 class Inject(Container):
     """Class wrapper over `multiprocessing.Process`.
+
+    Deprecated since 1.4! Use Container with target_pid
+    argument.
 
     Create process in namespaces of another one.
 
     The class is analagous to `threading.Thread`.
 
     """
-    def __init__(self, target_pid, target, args=(), kwargs={}, proc='/proc', *pargs, **pkwargs):
+    def __init__(self, *pargs, **pkwargs):
         """Set new namespaces and execute Process.__init__
 
         Set self.setns as target with necessary args and kwargs.
@@ -321,39 +379,4 @@ class Inject(Container):
         be used.
 
         """
-        nspaces = []
-        # all as default
-        if 'all' in pargs or ('all' in pkwargs and pkwargs['all']):
-            nspaces.append('all')
-        for ns in na:
-            for a in na[ns]['aliases']:
-                if a in args or (a in pkwargs and pkwargs[a]):
-                    nspaces.append(ns)
-
-        pkwargs['args'] = ()
-        pkwargs['kwargs'] = {
-            'pid': target_pid, 'target': target,
-            'args': args, 'kwargs': kwargs,
-            'nspaces': nspaces, 'proc': proc,
-        }
-        pkwargs['target'] = self.setns
         Container.__init__(self, *pargs, **pkwargs)
-
-    def setns(self, pid, target, args=(), kwargs={}, nspaces=[], proc='/proc'):
-        """Change namespaces and execute target.
-
-        Args:
-          path (str): path to chroot new root
-          target (python function): python function
-            for executing after chroot
-          args (list): args for target,
-            default is ()
-          kwargs (dict): kwargs for target,
-            default is {}
-          nspaces (list): list of namespaces for setns
-          proc (str): root directory of proc fs,
-            default is '/proc'
-
-        """
-        with setns(pid, proc, *nspaces):
-            return target(*args, **kwargs)

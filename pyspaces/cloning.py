@@ -11,8 +11,9 @@ Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
 import os
 import sys
 import errno
-import signal
 from .libc import *
+from signal import SIGKILL, SIGCHLD
+
 try:
     from multiprocessing.forking import Popen
 except ImportError:
@@ -105,13 +106,14 @@ class Clone(Popen):
         uid_map = process_obj.__dict__.pop('uid_map', "")
         gid_map = process_obj.__dict__.pop('gid_map', "")
         map_zero = process_obj.__dict__.pop('map_zero', False)
+        proc = process_obj.__dict__.pop('proc', '/proc')
 
         # Create the child in new namespace(s)
         child = CFUNCTYPE(c_int)(self.child)
         child_stack = create_string_buffer(STACK_SIZE)
         child_stack_pointer = c_void_p(cast(child_stack, c_void_p).value + STACK_SIZE)
 
-        self.pid = libc.clone(child, child_stack_pointer, flags | signal.SIGCHLD)
+        self.pid = libc.clone(child, child_stack_pointer, flags | SIGCHLD)
 
         if self.pid == -1:
             e = get_errno()
@@ -136,7 +138,7 @@ class Clone(Popen):
             return '\n'.join(arg)
 
         if uid_map or map_zero:
-            map_path = "/proc/%s/uid_map" % self.pid
+            map_path = "%s/%s/uid_map" % (proc, self.pid)
             if map_zero or type(uid_map) is bool:
                 uid_map = "0 %d 1" % os.getuid()
             else:
@@ -148,9 +150,9 @@ class Clone(Popen):
             # /proc/[pid]/gid_map will permanently disable setgroups(2) in a user
             # namespace and allow writing to /proc/[pid]/gid_map without having the
             # CAP_SETGID capability in the parent user namespace.
-            with open("/proc/%s/setgroups" % self.pid, 'w') as f:
+            with open("%s/%s/setgroups" % (proc, self.pid), 'w') as f:
                 f.write("deny")
-            map_path = "/proc/%s/gid_map" % self.pid
+            map_path = "%s/%s/gid_map" % (proc, self.pid)
             if map_zero or type(gid_map) is bool:
                 gid_map = "0 %d 1" % os.getgid()
             else:
@@ -219,7 +221,7 @@ class Clone(Popen):
             with open(map_file, 'w') as f:
                 f.write(mapping)
         except IOError as e:
-            os.kill(self.pid, signal.SIGKILL)
+            os.kill(self.pid, SIGKILL)
             raise IOError(
                 "Can not write %s: %s\nAborting!" % (map_file, e)
             )
