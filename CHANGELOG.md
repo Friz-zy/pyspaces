@@ -7,6 +7,7 @@
 - target_pid, proc, rootdir, workdir arguments into Process.__init__
 - runup, preup, nsenter, chtty, chroot, chdir, networking, postup, preexec, postexec functions into Process
 - proc variable into Clone and Process
+- setns now can take path to namespaces files as arguments
 
 ### Changed
 - processing of args and kwargs in Process.__init__

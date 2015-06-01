@@ -63,17 +63,23 @@ class Container(Process):
             path should be in new root tree
           all (bool): set all 6 namespaces,
             default is False
-          newuts (bool): set CLONE_NEWUTS flag,
+          newuts (bool or str): set CLONE_NEWUTS flag,
+            True or namespace file expected,
             default is False
-          newipc (bool): set CLONE_NEWIPC flag,
+          newipc (bool or str): set CLONE_NEWIPC flag,
+            True or namespace file expected,
             default is False
-          newuser (bool): set CLONE_NEWUSER flag,
+          newuser (bool or str): set CLONE_NEWUSER flag,
+            True or namespace file expected,
             default is False
-          newpid (bool): set CLONE_NEWPID flag,
+          newpid (bool or str): set CLONE_NEWPID flag,
+            True or namespace file expected,
             default is False
-          newnet (bool): set CLONE_NEWNET flag,
+          newnet (bool or str): set CLONE_NEWNET flag,
+            True or namespace file expected,
             default is False
-          newns (bool): set CLONE_NEWNS flag,
+          newns (bool or str): set CLONE_NEWNS flag,
+            True or namespace file expected,
             default is False
           vm (bool): set CLONE_VM flag,
             default is False
@@ -132,12 +138,12 @@ class Container(Process):
         value = pop('all', args, kwargs, False)
         if value:
             kwargs['all'] = value
-            kwargs['newipc'] = True
-            kwargs['newns'] = True
-            kwargs['newnet'] = True
-            kwargs['newpid'] = True
-            kwargs['newuser'] = True
-            kwargs['newuts'] = True
+            kwargs['newipc'] = kwargs.get('newipc', True)
+            kwargs['newns'] = kwargs.get('newns', True)
+            kwargs['newnet'] = kwargs.get('newnet', True)
+            kwargs['newpid'] = kwargs.get('newpid', True)
+            kwargs['newuser'] = kwargs.get('newuser', True)
+            kwargs['newuts'] = kwargs.get('newuts', True)
 
         for ns in na:
             value = pop_all(na[ns]['aliases'],

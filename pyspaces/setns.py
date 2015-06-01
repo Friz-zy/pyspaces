@@ -10,6 +10,7 @@ Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
 
 import errno
 from os import getpid
+from os.path import exists
 from .libc import libc, get_errno
 from .args_aliases import na
 from contextlib import contextmanager
@@ -30,6 +31,8 @@ def setns(pid, proc='/proc', *args, **kwargs):
     'all', 'ipc', 'newipc', 'mnt', 'newns',
     'net', 'newnet', 'pid', 'newpid',
     'user', 'newuser', 'uts', 'newuts'.
+    In kwargs True or namespace file expected
+    for each argument.
     If no one of them submitted 'all' will
     be used.
 
@@ -46,7 +49,11 @@ def setns(pid, proc='/proc', *args, **kwargs):
         for k in na:
             for a in na[k]['aliases']:
                 if all_ns or a in args or (a in kwargs and kwargs[a]):
-                    with open(fdtmp.format(proc, pid, k)) as f:
+                    if exists(kwargs.get(a, '')):
+                        namespace = kwargs[a]
+                    else:
+                        namespace = fdtmp.format(proc, pid, k)
+                    with open(namespace) as f:
                         if libc.setns(f.fileno(), na[k]['flag']) == -1:
                             raise
                     break
