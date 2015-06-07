@@ -11,7 +11,6 @@ Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
 from .setns import setns
 from . import cloning as cl
 from inspect import getargspec
-from contexter import Contexter
 from multiprocessing import Process
 from os import chroot, chdir, getcwd
 from .args_aliases import na, ca, get, get_all, pop, pop_all
@@ -33,6 +32,12 @@ class Container(Process):
         Args:
           *args (list): arguments for Process.__init__
           **kwargs (dict): arguments for Process.__init__
+          target (callable object): callable object to be
+            invoked by the run() method
+          args (tuple): argument tuple for the target
+            invocation, default is ()
+          kwargs (dict): dict of keyword arguments for
+            the target invocation, default is {}
           flags (int): flags for clone, default is 0
           uid_map (bool, int, str, list): UID mapping
             for new namespace:
@@ -117,6 +122,8 @@ class Container(Process):
         """
         self.args = args
         self.kwargs = kwargs
+        self.kwargs['args'] = kwargs.get('args', ())
+        self.kwargs['kwargs'] = kwargs.get('kwargs', {})
 
         # 1) clear args and move all to kwargs +
         # 2) change target to self.runup +
@@ -130,6 +137,7 @@ class Container(Process):
         self.map_zero = pop('map_zero', args, kwargs, False)
         self.proc = kwargs.get('proc', '/proc')
 
+        self.kwargs['proc'] = self.proc
         self.kwargs['target_pid'] = kwargs.get('target_pid', 0)
         self.kwargs['rootdir'] = kwargs.get('rootdir', '/')
         self.kwargs['workdir'] = kwargs.get('workdir', getcwd())
@@ -176,12 +184,12 @@ class Container(Process):
         TODO:
           0.1) [x] new ns and sigmask (Clone)
           0.2) [x] set uid, gid (Clone)
-          0.3) open Contexter context manager as ctx
           1) [x] self.preup
+          2) [ ] demonize
           2.1) [ ] change context - apparmor
           2.2) [ ] change context - selinux
-          2.3) [ ] change context - self.nsenter
-          2.4) [ ] change context - self.chtty ?vagga before ns
+          2.3) [x] self.nsenter
+          2.5) [ ] self.chtty ?vagga before ns
           3) [x] self.chroot
           4) [x] self.chdir
           5) [x] self.networking
@@ -204,24 +212,23 @@ class Container(Process):
           any exception
 
         """
-        with Contexter() as self.ctx:
-            try:
-                self.preup()
-                self.nsenter()
-                self.chtty()
-                self.chroot()
-                self.chdir()
-                self.networking()
-            finally:
-                self.postup()
-            try:
-                self.preexec()
-                return_value = self.kwargs['target'](
-                    *self.kwargs['args'],
-                    **self.kwargs['kwargs']
-                ) or 0
-            finally:
-                self.postexec()
+        try:
+            self.preup()
+            self.nsenter()
+            self.chtty()
+            self.chroot()
+            self.chdir()
+            self.networking()
+        finally:
+            self.postup()
+        try:
+            self.preexec()
+            return_value = self.kwargs['target'](
+                *self.kwargs['args'],
+                **self.kwargs['kwargs']
+            ) or 0
+        finally:
+            self.postexec()
         return return_value
 
     def preup(self):
@@ -239,11 +246,7 @@ class Container(Process):
           self.proc
 
           """
-        if self.kwargs['target_pid']:
-            self.ctx.append(setns(
-                self.kwargs['target_pid'],
-                self.proc, **self.kwargs)
-            )
+        setns(**self.kwargs)
 
     def chtty(self):
         pass

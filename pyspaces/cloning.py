@@ -102,11 +102,11 @@ class Clone(Popen):
         self.pipe_fd = os.pipe()
 
         # clone attributes
-        flags = process_obj.__dict__.pop('clone_flags', 0)
-        uid_map = process_obj.__dict__.pop('uid_map', "")
-        gid_map = process_obj.__dict__.pop('gid_map', "")
-        map_zero = process_obj.__dict__.pop('map_zero', False)
-        proc = process_obj.__dict__.pop('proc', '/proc')
+        flags = process_obj.__dict__.get('clone_flags', 0)
+        uid_map = process_obj.__dict__.get('uid_map', "")
+        gid_map = process_obj.__dict__.get('gid_map', "")
+        map_zero = process_obj.__dict__.get('map_zero', False)
+        proc = process_obj.__dict__.get('proc', '/proc')
 
         # Create the child in new namespace(s)
         child = CFUNCTYPE(c_int)(self.child)

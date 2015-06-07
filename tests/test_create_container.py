@@ -36,6 +36,7 @@ def test_basic_container(capfd):
     c.start()
     c.join()
     out, err = capfd.readouterr()
+    print out, err
     assert len(out.splitlines()) == 3
 
 if __name__ == "__main__":

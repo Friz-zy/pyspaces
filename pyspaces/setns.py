@@ -12,7 +12,7 @@ import errno
 from os import getpid
 from os.path import exists
 from .libc import libc, get_errno
-from .args_aliases import na
+from .args_aliases import na, get_all
 from contextlib import contextmanager
 
 
@@ -46,22 +46,24 @@ def setns(pid, proc='/proc', *args, **kwargs):
     #'{proc}/{pid}/ns/{ns}'
     fdtmp = '{0}/{1}/ns/{2}'
     try:
-        for k in na:
-            for a in na[k]['aliases']:
-                if all_ns or a in args or (a in kwargs and kwargs[a]):
-                    if exists(kwargs.get(a, '')):
-                        namespace = kwargs[a]
-                    else:
-                        namespace = fdtmp.format(proc, pid, k)
-                    with open(namespace) as f:
-                        if libc.setns(f.fileno(), na[k]['flag']) == -1:
-                            raise
-                    break
+        for ns in na:
+            value = get_all(na[ns]['aliases'], args, kwargs, '')
+            if all_ns or value:
+                if exists(value):
+                    namespace = value
+                else:
+                    namespace = fdtmp.format(proc, pid, na[ns]['aliases'][0])
+                with open(namespace) as f:
+                    if libc.setns(f.fileno(), na[ns]['flag']) == -1:
+                        raise ValueError("Namespace file %s has invalid type %s" %
+                                         (f.fileno(), na[ns]['flag'])
+                        )
+                break
         yield
     except:
         e = get_errno()
         raise OSError(e, errno.errorcode[e])
     finally:
-        for k in na:
-            with open(fdtmp.format(proc, getpid(), k)) as f:
-                libc.setns(f.fileno(), na[k]['flag'])
+        for ns in na:
+            with open(fdtmp.format(proc, getpid(), na[ns]['aliases'][0])) as f:
+                libc.setns(f.fileno(), na[ns]['flag'])

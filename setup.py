@@ -41,7 +41,7 @@ long_description=md2rst(join(dirname(__file__), 'README.md')),
 packages=find_packages(),
 cmdclass = {'test': PyTest},
 tests_require=['pytest', 'pytest_capturelog', 'pytest-cov'],
-install_requires=['contexter'],
+install_requires=[],
 entry_points={
 'console_scripts': [
 'space = pyspaces.cli:cli',
