@@ -11,5 +11,5 @@ Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
 from ctypes import *
 
 
-libc = CDLL("libc.so.6", use_errno=True)
+libc = CDLL(None, use_errno=True)
 """Import libc.so.6 as libc"""

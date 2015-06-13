@@ -3,15 +3,14 @@
 - target, args, kwargs as clearly required arguments
 - get, get_all functions into args_aliases.py
 - processing of different types of values for uid_map and gid_map agrguments
-- dummy functions to Process
-- target_pid, proc, rootdir, workdir arguments into Process.__init__
-- runup, preup, nsenter, chtty, chroot, chdir, networking, postup, preexec, postexec functions into Process
-- proc variable into Clone and Process
+- target_pid, proc, rootdir, workdir, daemonize, stdin, stdout, stderr arguments into Container.__init__
+- runup, preup, nsenter, chroot, chdir, chtty, postup, exceptup, preexec, postexec, exceptexec functions into Container
+- proc variable into Clone and Container
 - setns now can take path to namespaces files as arguments
 
 ### Changed
 - add rasing value error in setns
-- processing of args and kwargs in Process.__init__
+- processing of args and kwargs in Container.__init__
 - Inject and Chroot classes now based on Container and deprecated
 
 ## 1.3.1 - 2015-05-26

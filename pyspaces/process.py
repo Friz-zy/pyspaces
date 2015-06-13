@@ -8,11 +8,12 @@ Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
 """
 
 
+import os
+import sys
 from .setns import setns
 from . import cloning as cl
 from inspect import getargspec
 from multiprocessing import Process
-from os import chroot, chdir, getcwd
 from .args_aliases import na, ca, get, get_all, pop, pop_all
 
 
@@ -38,34 +39,6 @@ class Container(Process):
             invocation, default is ()
           kwargs (dict): dict of keyword arguments for
             the target invocation, default is {}
-          flags (int): flags for clone, default is 0
-          uid_map (bool, int, str, list): UID mapping
-            for new namespace:
-            bool: map current uid as root
-            int: map given uid as root
-            str: like int or in format
-            ' '.join((<start uid in new ns>,
-                      <start uid in current ns>,
-                      <range to mapping>
-            )). Example "0 1000 1" will map 1000 uid as root,
-            "0 1000 1,1 1001 1" or "1000,1001"
-            will map 1000 as root and 1001 as uid 1.
-            list: list of int or str
-            default is ""
-          gid_map (bool, int, str, list): GID mapping
-            for new namespace, format the same as uid_map,
-            default is ""
-          map_zero (bool): Map user's UID and GID to 0
-            in user namespace, default is False
-          target_pid (str or int): pid of target process,
-            used for executing setns
-          proc (str): root directory of proc fs,
-            default is '/proc'
-          rootdir (str): path to root, default is '/'
-          workdir (str): path to working dir,
-            default is os.getcwd();
-            if you set new rootdir, workdir
-            path should be in new root tree
           all (bool): set all 6 namespaces,
             default is False
           newuts (bool or str): set CLONE_NEWUTS flag,
@@ -86,6 +59,44 @@ class Container(Process):
           newns (bool or str): set CLONE_NEWNS flag,
             True or namespace file expected,
             default is False
+          uid_map (bool, int, str, list): UID mapping
+            for new namespace:
+            bool: map current uid as root
+            int: map given uid as root
+            str: like int or in format
+            ' '.join((<start uid in new ns>,
+                      <start uid in current ns>,
+                      <range to mapping>
+            )). Example "0 1000 1" will map 1000 uid as root,
+            "0 1000 1,1 1001 1" or "1000,1001"
+            will map 1000 as root and 1001 as uid 1.
+            list: list of int or str
+            default is ""
+          gid_map (bool, int, str, list): GID mapping
+            for new namespace, format the same as uid_map,
+            default is ""
+          map_zero (bool): Map user's UID and GID to 0
+            in user namespace, default is False
+          rootdir (str): path to root, default is '/'
+          workdir (str): path to working dir,
+            default is os.getcwd();
+            if you set new rootdir, workdir
+            path should be in new root tree
+          stdin (str, int, fd, fo): set new sys.stdin
+            and 0 file descriptor,
+            default '/dev/null' if daemonize
+          stdout (str, int, fd, fo): set new sys.stdout
+            and 1 file descriptor,
+            default '/dev/null' if daemonize
+          stderr (str, int, fd, fo): set new sys.stderr
+            and 2 file descriptor,
+            default '/dev/null' if daemonize
+          target_pid (str or int): pid of target process,
+            used for executing setns
+          daemonize (bool): execute target as
+            daemon, default is False
+          proc (str): root directory of proc fs,
+            default is '/proc'
           vm (bool): set CLONE_VM flag,
             default is False
           fs (bool): set CLONE_FS flag,
@@ -118,6 +129,7 @@ class Container(Process):
             default is False
           io (bool): set CLONE_IO flag,
             default is False
+          flags (int): flags for clone, default is 0
 
         """
         self.args = args
@@ -140,7 +152,17 @@ class Container(Process):
         self.kwargs['proc'] = self.proc
         self.kwargs['target_pid'] = kwargs.get('target_pid', 0)
         self.kwargs['rootdir'] = kwargs.get('rootdir', '/')
-        self.kwargs['workdir'] = kwargs.get('workdir', getcwd())
+        self.kwargs['workdir'] = kwargs.get('workdir', os.getcwd())
+        self.kwargs['daemonize'] = pop('daemonize', args, kwargs, False)
+        self.kwargs['stdin'] = kwargs.get('stdin', None)
+        if self.kwargs['stdin'] in (None, False) and self.kwargs['daemonize']:
+            self.kwargs['stdin'] = '/dev/null'
+        self.kwargs['stdout'] = kwargs.get('stdout', None)
+        if self.kwargs['stdout'] in (None, False) and self.kwargs['daemonize']:
+            self.kwargs['stdout'] = '/dev/null'
+        self.kwargs['stderr'] = kwargs.get('stderr', None)
+        if self.kwargs['stderr'] in (None, False) and self.kwargs['daemonize']:
+            self.kwargs['stderr'] = '/dev/null'
 
         # clear args and move all specific args to kwargs
         value = pop('all', args, kwargs, False)
@@ -181,22 +203,21 @@ class Container(Process):
     def runup(self):
         """Main wrapper over target function.
 
-        TODO:
-          0.1) [x] new ns and sigmask (Clone)
-          0.2) [x] set uid, gid (Clone)
-          1) [x] self.preup
-          2) [ ] demonize
-          2.1) [ ] change context - apparmor
-          2.2) [ ] change context - selinux
-          2.3) [x] self.nsenter
-          2.5) [ ] self.chtty ?vagga before ns
-          3) [x] self.chroot
-          4) [x] self.chdir
-          5) [x] self.networking
-          6) [x] self.postup - in finally block
-          7) [x] self.preexec
-          8) [x] execute self.target
-          9) [x] self.postexec - in finally block
+        Execution order:
+          0.1) new ns and sigmask (Clone)
+          0.2) set uid, gid (Clone)
+          1) self.preup (mount, etc)
+          4) self.daemonize
+          5) self.nsenter
+          6) self.chroot
+          7) self.chdir
+          8) self.chtty ?vagga before ns
+          9) self.postup - in finally block
+          10) self.exceptup - in except block
+          11) self.preexec (networking, etc)
+          12) execute self.target
+          13) self.postexec - in finally block
+          14) self.exceptexec - in except block
 
         Required:
           self.kwargs['target']
@@ -211,14 +232,21 @@ class Container(Process):
         Raise:
           any exception
 
+        TODO:
+          apparmor
+          selinux
+
         """
         try:
             self.preup()
+            self.daemonize()
             self.nsenter()
-            self.chtty()
             self.chroot()
             self.chdir()
-            self.networking()
+            self.chtty()
+        except:
+            self.exceptup()
+            raise
         finally:
             self.postup()
         try:
@@ -227,6 +255,9 @@ class Container(Process):
                 *self.kwargs['args'],
                 **self.kwargs['kwargs']
             ) or 0
+        except:
+            self.exceptexec()
+            raise
         finally:
             self.postexec()
         return return_value
@@ -234,6 +265,20 @@ class Container(Process):
     def preup(self):
         """Dummy function."""
         pass
+
+    def daemonize(self):
+        """Execute target as daemon
+
+        Required:
+          self.kwargs['daemonize'].
+
+        """
+        if self.kwargs['daemonize']:
+            os.umask(0)
+            os.setsid()
+            pid = os.fork()
+            if pid > 0:
+                sys.exit(0)
 
     def nsenter(self):
         """Change current namespaces to pid namespaces.
@@ -248,9 +293,6 @@ class Container(Process):
           """
         setns(**self.kwargs)
 
-    def chtty(self):
-        pass
-
     def chroot(self):
         """Change root with os.chroot.
 
@@ -264,9 +306,9 @@ class Container(Process):
 
         """
         if self.kwargs['rootdir'] != '/':
-            chdir(self.kwargs['rootdir'])
-            chroot(self.kwargs['rootdir'])
-            chdir(self.kwargs['workdir'])
+            os.chdir(self.kwargs['rootdir'])
+            os.chroot(self.kwargs['rootdir'])
+            os.chdir(self.kwargs['workdir'])
 
     def chdir(self):
         """Change working dir with os.chdir.
@@ -274,17 +316,52 @@ class Container(Process):
         Change current directory to new
 
         Required:
-          self.kwargs['workdir'].
+          self.kwargs['workdir']
 
         """
-        if self.kwargs['workdir'] != getcwd():
-            chdir(self.kwargs['workdir'])
+        if self.kwargs['workdir'] != os.getcwd():
+            os.chdir(self.kwargs['workdir'])
 
-    def networking(self):
+    def chtty(self):
+        """Change stdin, stdout, stderr.
+
+        Required:
+          self.kwargs['stdin']
+          self.kwargs['stdout']
+          self.kwargs['stderr']
+
+        """
+        stdin = self.kwargs['stdin']
+        if stdin not in (None, False):
+            if type(stdin) is str and os.path.exists(stdin):
+                stdin = file(stdin, 'r')
+                stdin = stdin.fileno()
+            os.dup2(stdin, 0)
+            os.dup2(stdin, sys.stdin.fileno())
+
+        stdout = self.kwargs['stdout']
+        if stdout not in (None, False):
+            if type(stdout) is str and os.path.exists(stdout):
+                stdout = file(stdout, 'r')
+                stdout = stdout.fileno()
+            os.dup2(stdout, 0)
+            sys.stdout.flush()
+            os.dup2(stdout, sys.stdout.fileno())
+
+        stderr = self.kwargs['stderr']
+        if stderr not in (None, False):
+            if type(stderr) is str and os.path.exists(stderr):
+                stderr = file(stderr, 'r')
+                stderr = stderr.fileno()
+            os.dup2(stderr, 0)
+            sys.stderr.flush()
+            os.dup2(stderr, sys.stderr.fileno())
+
+    def postup(self):
         """Dummy function."""
         pass
 
-    def postup(self):
+    def exceptup(self):
         """Dummy function."""
         pass
 
@@ -293,6 +370,10 @@ class Container(Process):
         pass
 
     def postexec(self):
+        """Dummy function."""
+        pass
+
+    def exceptexec(self):
         """Dummy function."""
         pass
 
