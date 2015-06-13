@@ -77,11 +77,12 @@ class Container(Process):
             default is ""
           map_zero (bool): Map user's UID and GID to 0
             in user namespace, default is False
-          rootdir (str): path to root, default is '/'
-          workdir (str): path to working dir,
+          rootdir (str): path to new root, default is None
+          workdir (str): path to new working dir,
             default is os.getcwd();
             if you set new rootdir, workdir
             path should be in new root tree
+            and default will be '/'
           stdin (str, int, fd, fo): set new sys.stdin
             and 0 file descriptor,
             default '/dev/null' if daemonize
@@ -151,8 +152,13 @@ class Container(Process):
 
         self.kwargs['proc'] = self.proc
         self.kwargs['target_pid'] = kwargs.get('target_pid', 0)
-        self.kwargs['rootdir'] = kwargs.get('rootdir', '/')
-        self.kwargs['workdir'] = kwargs.get('workdir', os.getcwd())
+        self.kwargs['rootdir'] = kwargs.get('rootdir', None)
+        self.kwargs['workdir'] = kwargs.get('workdir', None)
+        if self.kwargs['workdir'] in (None, False):
+            if self.kwargs['rootdir']:
+                self.kwargs['workdir'] = '/'
+            else:
+                self.kwargs['workdir'] = os.getcwd()
         self.kwargs['daemonize'] = pop('daemonize', args, kwargs, False)
         self.kwargs['stdin'] = kwargs.get('stdin', None)
         if self.kwargs['stdin'] in (None, False) and self.kwargs['daemonize']:
@@ -290,8 +296,9 @@ class Container(Process):
           'all' or any of ns arguments
           self.proc
 
-          """
-        setns(**self.kwargs)
+        """
+        if self.kwargs['target_pid']:
+            setns(self.kwargs['target_pid'], **self.kwargs)
 
     def chroot(self):
         """Change root with os.chroot.
@@ -302,13 +309,11 @@ class Container(Process):
 
         Required:
           self.kwargs['rootdir']
-          self.kwargs['workdir']
 
         """
-        if self.kwargs['rootdir'] != '/':
+        if self.kwargs['rootdir']:
             os.chdir(self.kwargs['rootdir'])
             os.chroot(self.kwargs['rootdir'])
-            os.chdir(self.kwargs['workdir'])
 
     def chdir(self):
         """Change working dir with os.chdir.
@@ -419,12 +424,10 @@ class Chroot(Container):
           **ckwargs (dict): arguments for Container.__init__
 
         """
-        ckwargs['args'] = ()
-        ckwargs['kwargs'] = {
-            'rootdir': path, 'target': target,
-            'workdir': ckwargs.get('workdir', path),
-            'args': args, 'kwargs': kwargs
-        }
+        ckwargs['rootdir'] = path
+        ckwargs['target'] = target
+        ckwargs['args'] = args
+        ckwargs['kwargs'] = kwargs
         ckwargs['newuser'] = True
         ckwargs['newns'] = True
         Container.__init__(self, *cargs, **ckwargs)

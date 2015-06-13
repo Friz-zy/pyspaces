@@ -4,7 +4,7 @@
 - get, get_all functions into args_aliases.py
 - processing of different types of values for uid_map and gid_map agrguments
 - target_pid, proc, rootdir, workdir, daemonize, stdin, stdout, stderr arguments into Container.__init__
-- runup, preup, nsenter, chroot, chdir, chtty, postup, exceptup, preexec, postexec, exceptexec functions into Container
+- runup, preup, daemonize, nsenter, chroot, chdir, chtty, postup, exceptup, preexec, postexec, exceptexec functions into Container
 - proc variable into Clone and Container
 - setns now can take path to namespaces files as arguments
 
