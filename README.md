@@ -59,7 +59,7 @@ Child returned: pid 15978, status 0
 ## CLI
 
 ```bash
-space -v execute --pid --mnt --user --uid '0 1000 1' bash -c 'mount -t proc /proc; ps ax'
+space execute -v --pid --mnt --user --uid '0 1000 1' bash -c 'mount -t proc /proc; ps ax'
 ```
 
 ```bash

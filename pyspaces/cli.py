@@ -11,7 +11,8 @@ Copyright (c) 2014 Filipp Kucheryavy aka Frizzy <filipp.s.frizzy@gmail.com>
 import os
 import argparse
 from . import __version__
-from .process import Container, Chroot, Inject
+from .setns import setns
+from .process import Container, Chroot
 
 
 def cli():
@@ -197,22 +198,15 @@ def inject(args, argv):
 
     $ space inject --all 12603 bash
 
-    Create a child process that executes a shell command in
-    namespace(s) of another process.
-
     """
     argv.insert(0, args.argv)
-    c = Inject(target=os.execvp, args=(argv[0], argv),
-              newpid=args.pid, newuser=args.user, newns=args.mnt,
-              newuts=args.uts, newipc=args.ipc, newnet=args.net,
-              all=args.all, target_pid=args.target_pid, proc=args.proc
-    )
-    c.start()
     if args.verbose:
-        print("PID of child created by clone() is %ld\n" % c.pid)
-    c.join()
-    if args.verbose:
-        print("Child returned: pid %s, status %s" % (c.pid, c.exitcode))
+        print("PID is %ld\n" % os.getpid())
+    with setns(args.target_pid, False, args.proc,
+               newpid=args.pid, newuser=args.user, newns=args.mnt,
+               newuts=args.uts, newipc=args.ipc, newnet=args.net,
+               all=args.all):
+        os.execvp(argv[0], argv)
 
 
 if __name__ == '__main__':

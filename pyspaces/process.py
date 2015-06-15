@@ -41,23 +41,17 @@ class Container(Process):
             the target invocation, default is {}
           all (bool): set all 6 namespaces,
             default is False
-          newuts (bool or str): set CLONE_NEWUTS flag,
-            True or namespace file expected,
+          newuts (bool): set CLONE_NEWUTS flag,
             default is False
-          newipc (bool or str): set CLONE_NEWIPC flag,
-            True or namespace file expected,
+          newipc (bool): set CLONE_NEWIPC flag,
             default is False
-          newuser (bool or str): set CLONE_NEWUSER flag,
-            True or namespace file expected,
+          newuser (bool): set CLONE_NEWUSER flag,
             default is False
-          newpid (bool or str): set CLONE_NEWPID flag,
-            True or namespace file expected,
+          newpid (bool): set CLONE_NEWPID flag,
             default is False
-          newnet (bool or str): set CLONE_NEWNET flag,
-            True or namespace file expected,
+          newnet (bool): set CLONE_NEWNET flag,
             default is False
-          newns (bool or str): set CLONE_NEWNS flag,
-            True or namespace file expected,
+          newns (bool): set CLONE_NEWNS flag,
             default is False
           uid_map (bool, int, str, list): UID mapping
             for new namespace:
@@ -92,8 +86,6 @@ class Container(Process):
           stderr (str, int, fd, fo): set new sys.stderr
             and 2 file descriptor,
             default '/dev/null' if daemonize
-          target_pid (str or int): pid of target process,
-            used for executing setns
           daemonize (bool): execute target as
             daemon, default is False
           proc (str): root directory of proc fs,
@@ -138,12 +130,6 @@ class Container(Process):
         self.kwargs['args'] = kwargs.get('args', ())
         self.kwargs['kwargs'] = kwargs.get('kwargs', {})
 
-        # 1) clear args and move all to kwargs +
-        # 2) change target to self.runup +
-        # 3) functions for *id maps
-        # 4) ns in (bool, file, fd)
-        # 5) works with kwargs with get
-
         self.clone_flags = kwargs.get('flags', 0)
         self.uid_map = pop('uid_map', args, kwargs, "")
         self.gid_map = pop('gid_map', args, kwargs, "")
@@ -151,7 +137,6 @@ class Container(Process):
         self.proc = kwargs.get('proc', '/proc')
 
         self.kwargs['proc'] = self.proc
-        self.kwargs['target_pid'] = kwargs.get('target_pid', 0)
         self.kwargs['rootdir'] = kwargs.get('rootdir', None)
         self.kwargs['workdir'] = kwargs.get('workdir', None)
         if self.kwargs['workdir'] in (None, False):
@@ -175,11 +160,23 @@ class Container(Process):
         if value:
             kwargs['all'] = value
             kwargs['newipc'] = kwargs.get('newipc', True)
+            if not kwargs['newipc']:
+                kwargs['newipc'] = True
             kwargs['newns'] = kwargs.get('newns', True)
+            if not kwargs['newns']:
+                kwargs['newns'] = True
             kwargs['newnet'] = kwargs.get('newnet', True)
+            if not kwargs['newnet']:
+                kwargs['newnet'] = True
             kwargs['newpid'] = kwargs.get('newpid', True)
+            if not kwargs['newpid']:
+                kwargs['newpid'] = True
             kwargs['newuser'] = kwargs.get('newuser', True)
+            if not kwargs['newuser']:
+                kwargs['newuser'] = True
             kwargs['newuts'] = kwargs.get('newuts', True)
+            if not kwargs['newuts']:
+                kwargs['newuts'] = True
 
         for ns in na:
             value = pop_all(na[ns]['aliases'],
@@ -214,16 +211,15 @@ class Container(Process):
           0.2) set uid, gid (Clone)
           1) self.preup (mount, etc)
           4) self.daemonize
-          5) self.nsenter
-          6) self.chroot
-          7) self.chdir
-          8) self.chtty ?vagga before ns
-          9) self.postup - in finally block
-          10) self.exceptup - in except block
-          11) self.preexec (networking, etc)
-          12) execute self.target
-          13) self.postexec - in finally block
-          14) self.exceptexec - in except block
+          5) self.chroot
+          6) self.chdir
+          7) self.chtty ?vagga before ns
+          8) self.postup - in finally block
+          9) self.exceptup - in except block
+          10) self.preexec (networking, etc)
+          11) execute self.target
+          12) self.postexec - in finally block
+          13) self.exceptexec - in except block
 
         Required:
           self.kwargs['target']
@@ -246,7 +242,6 @@ class Container(Process):
         try:
             self.preup()
             self.daemonize()
-            self.nsenter()
             self.chroot()
             self.chdir()
             self.chtty()
@@ -298,7 +293,7 @@ class Container(Process):
 
         """
         if self.kwargs['target_pid']:
-            setns(self.kwargs['target_pid'], **self.kwargs)
+            setns(**self.kwargs)
 
     def chroot(self):
         """Change root with os.chroot.
@@ -435,15 +430,12 @@ class Chroot(Container):
 class Inject(Container):
     """Class wrapper over `multiprocessing.Process`.
 
-    Deprecated since 1.4! Use Container with target_pid
-    argument.
-
     Create process in namespaces of another one.
 
     The class is analagous to `threading.Thread`.
 
     """
-    def __init__(self, *pargs, **pkwargs):
+    def __init__(self, target_pid, target, args=(), kwargs={}, proc='/proc', *pargs, **pkwargs):
         """Set new namespaces and execute Process.__init__
 
         Set self.setns as target with necessary args and kwargs.
@@ -451,7 +443,8 @@ class Inject(Container):
 
 
         Args:
-          target_pid (str or int): pid of target process
+          target_pid (str or int): pid of target process,
+            used for executing setns
           target (python function): python function
             for executing
           args (list): args for target,
@@ -472,4 +465,58 @@ class Inject(Container):
         be used.
 
         """
-        Container.__init__(self, *pargs, **pkwargs)
+        nspaces = []
+        # all as default
+        if pop('all', pargs, pkwargs, False):
+            nspaces.append('all')
+        for ns in na:
+            if pop_all(na[ns]['aliases'], pargs, pkwargs, False):
+                nspaces.append(ns)
+
+        pkwargs['args'] = ()
+        pkwargs['kwargs'] = {
+            'target_pid': target_pid, 'target': target,
+            'args': args, 'kwargs': kwargs,
+            'nspaces': nspaces, 'proc': proc,
+        }
+        pkwargs['target'] = self.setns
+        Process.__init__(self, *pargs, **pkwargs)
+
+    def setns(self, target_pid, target, args=(), kwargs={}, nspaces=[], proc='/proc'):
+        """Change namespaces and execute target.
+
+        Args:
+          path (str): path to chroot new root
+          target (python function): python function
+            for executing after chroot
+          args (list): args for target,
+            default is ()
+          kwargs (dict): kwargs for target,
+            default is {}
+          nspaces (list): list of namespaces for setns
+          proc (str): root directory of proc fs,
+            default is '/proc'
+          all (bool): set all 6 namespaces,
+            default is False
+          newuts (bool or str): enter uts namespace,
+            True or namespace file expected,
+            default is False
+          newipc (bool or str): enter ipc namespace,
+            True or namespace file expected,
+            default is False
+          newuser (bool or str): enter user namespace,
+            True or namespace file expected,
+            default is False
+          newpid (bool or str): enter pid namespace,
+            True or namespace file expected,
+            default is False
+          newnet (bool or str): enter net namespace,
+            True or namespace file expected,
+            default is False
+          newns (bool or str): enter mount namespace,
+            True or namespace file expected,
+            default is False
+
+        """
+        with setns(target_pid, self.pid, proc, *nspaces):
+            return target(*args, **kwargs)

@@ -12,16 +12,21 @@ import errno
 from os import getpid
 from os.path import exists
 from .libc import libc, get_errno
-from .args_aliases import na, get_all
+from .args_aliases import na, pop_all
 from contextlib import contextmanager
 
 
 @contextmanager
-def setns(pid, proc='/proc', *args, **kwargs):
+def setns(target_pid, parent_pid=0, proc='/proc', *args, **kwargs):
     """Change current namespaces to pid namespaces.
 
+    Changes:
+      pid -> target_pid since v1.4
+      add parent_pid since v.1.4
+
     Args:
-      pid (str or int): pid of target process
+      target_pid (str or int): pid of target process
+      parent_pid (str or int): pid of parent process
       proc (str): root directory of proc fs,
         default is '/proc'
       *args (list): list of namespaces
@@ -37,6 +42,7 @@ def setns(pid, proc='/proc', *args, **kwargs):
     be used.
 
     """
+    parent_pid = parent_pid or getpid()
     # all as default
     if ((len(args) == 0 and len(kwargs) == 0) or
        ('all' in args or 'all' in kwargs)):
@@ -47,23 +53,20 @@ def setns(pid, proc='/proc', *args, **kwargs):
     fdtmp = '{0}/{1}/ns/{2}'
     try:
         for ns in na:
-            value = get_all(na[ns]['aliases'], args, kwargs, '')
+            value = pop_all(na[ns]['aliases'], args, kwargs, '')
             if all_ns or value:
-                if exists(value):
+                if type(value) is str and exists(value):
                     namespace = value
                 else:
-                    namespace = fdtmp.format(proc, pid, na[ns]['aliases'][0])
+                    namespace = fdtmp.format(proc, target_pid, na[ns]['aliases'][0])
                 with open(namespace) as f:
                     if libc.setns(f.fileno(), na[ns]['flag']) == -1:
                         raise ValueError("Namespace file %s has invalid type %s" %
-                                         (f.fileno(), na[ns]['flag'])
+                                        (f.fileno(), na[ns]['flag'])
                         )
                 break
         yield
-    except:
-        e = get_errno()
-        raise OSError(e, errno.errorcode[e])
     finally:
         for ns in na:
-            with open(fdtmp.format(proc, getpid(), na[ns]['aliases'][0])) as f:
+            with open(fdtmp.format(proc, parent_pid, na[ns]['aliases'][0])) as f:
                 libc.setns(f.fileno(), na[ns]['flag'])
