@@ -1,4 +1,6 @@
 ## [Unreleased][unreleased]
+
+## 1.4 - 2015-06-18
 ### Added
 - target, args, kwargs as clearly required arguments
 - get, get_all functions into args_aliases.py
@@ -124,7 +126,8 @@
 - cloning.py and process.py as first working concept
 - initial commit with necessary files
 
-[unreleased](https://github.com/Friz-zy/pyspaces/compare/v1.3.1...HEAD)
+[unreleased](https://github.com/Friz-zy/pyspaces/compare/v1.4...HEAD)
+[1.3.1-1.4](https://github.com/Friz-zy/pyspaces/compare/v1.3.1...v1.4)
 [1.3-1.3.1](https://github.com/Friz-zy/pyspaces/compare/v1.3...v1.3.1)
 [1.2.4-1.3](https://github.com/Friz-zy/pyspaces/compare/v1.2.4...v1.3)
 [1.2.3-1.2.4](https://github.com/Friz-zy/pyspaces/compare/v1.2.3...v1.2.4)
