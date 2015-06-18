@@ -12,8 +12,9 @@
 ### Changed
 - add rasing value error in setns
 - processing of args and kwargs in Container.__init__
-- Chroot class now based on Container and deprecated
+- Chroot class now based on Container
 - change pid to target_pid first argument in setns
+- set to None default values for 6 ns flags in Container.__init__ and setns
 
 ### Removed
 - except block from setns

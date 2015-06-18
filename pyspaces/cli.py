@@ -37,27 +37,27 @@ def cli():
         action='store_true', help='Use all 6 namespaces'
     )
     p_ipc = argparse.ArgumentParser(add_help=False)
-    p_ipc.add_argument('--ipc', '-i', default=False,
+    p_ipc.add_argument('--ipc', '-i', default=None,
         action='store_true', help='New IPC namespace'
     )
     p_mount = argparse.ArgumentParser(add_help=False)
-    p_mount.add_argument('--mnt', '--fs', '-m', default=False,
+    p_mount.add_argument('--mnt', '--fs', '-m', default=None,
         action='store_true', help='New mount namespace'
     )
     p_net = argparse.ArgumentParser(add_help=False)
-    p_net.add_argument('--net', '-n', default=False,
+    p_net.add_argument('--net', '-n', default=None,
         action='store_true', help='New network namespace'
     )
     p_pid = argparse.ArgumentParser(add_help=False)
-    p_pid.add_argument('--pid', '-p', default=False,
+    p_pid.add_argument('--pid', '-p', default=None,
         action='store_true', help='New PID namespace'
     )
     p_uts = argparse.ArgumentParser(add_help=False)
-    p_uts.add_argument('--uts', '-u', default=False,
+    p_uts.add_argument('--uts', '-u', default=None,
         action='store_true', help='New UTS namespace'
     )
     p_user = argparse.ArgumentParser(add_help=False)
-    p_user.add_argument('--user', '-U', default=False,
+    p_user.add_argument('--user', '-U', default=None,
         action='store_true', help='New user namespace'
     )
     p_uid = argparse.ArgumentParser(add_help=False)

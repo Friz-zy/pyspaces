@@ -41,18 +41,24 @@ class Container(Process):
             the target invocation, default is {}
           all (bool): set all 6 namespaces,
             default is False
-          newuts (bool): set CLONE_NEWUTS flag,
-            default is False
-          newipc (bool): set CLONE_NEWIPC flag,
-            default is False
-          newuser (bool): set CLONE_NEWUSER flag,
-            default is False
-          newpid (bool): set CLONE_NEWPID flag,
-            default is False
-          newnet (bool): set CLONE_NEWNET flag,
-            default is False
-          newns (bool): set CLONE_NEWNS flag,
-            default is False
+          newuts, uts (bool): set CLONE_NEWUTS flag if True,
+            does not set flag enev with 'all' arg if False,
+            default is None
+          newipc, ipc (bool): set CLONE_NEWIPC flag if True,
+            does not set flag enev with 'all' arg if False,
+            default is None
+          newuser, user (bool): set CLONE_NEWUSER flag if True,
+            does not set flag enev with 'all' arg if False,
+            default is None
+          newpid, pid (bool): set CLONE_NEWPID flag if True,
+            does not set flag enev with 'all' arg if False,
+            default is None
+          newnet, net (bool): set CLONE_NEWNET flag if True,
+            does not set flag enev with 'all' arg if False,
+            default is None
+          newns, mnt (bool): set CLONE_NEWNS flag if True,
+            does not set flag enev with 'all' arg if False,
+            default is None
           uid_map (bool, int, str, list): UID mapping
             for new namespace:
             bool: map current uid as root
@@ -156,34 +162,18 @@ class Container(Process):
             self.kwargs['stderr'] = '/dev/null'
 
         # clear args and move all specific args to kwargs
-        value = pop('all', args, kwargs, False)
-        if value:
-            kwargs['all'] = value
-            kwargs['newipc'] = kwargs.get('newipc', True)
-            if not kwargs['newipc']:
-                kwargs['newipc'] = True
-            kwargs['newns'] = kwargs.get('newns', True)
-            if not kwargs['newns']:
-                kwargs['newns'] = True
-            kwargs['newnet'] = kwargs.get('newnet', True)
-            if not kwargs['newnet']:
-                kwargs['newnet'] = True
-            kwargs['newpid'] = kwargs.get('newpid', True)
-            if not kwargs['newpid']:
-                kwargs['newpid'] = True
-            kwargs['newuser'] = kwargs.get('newuser', True)
-            if not kwargs['newuser']:
-                kwargs['newuser'] = True
-            kwargs['newuts'] = kwargs.get('newuts', True)
-            if not kwargs['newuts']:
-                kwargs['newuts'] = True
+        kwargs['all'] = pop('all', args, kwargs, False)
 
         for ns in na:
             value = pop_all(na[ns]['aliases'],
-                            args, kwargs, False)
-            if value:
+                            args, kwargs, None)
+            if value is not None:
                 kwargs[na[ns]['aliases'][0]] = value
-                # set clone flags
+            elif kwargs['all']:
+                kwargs[na[ns]['aliases'][0]] = True
+                value = True
+            # set clone flags
+            if value:
                 self.clone_flags |= na[ns]['flag']
 
         for flag in ca:
@@ -281,20 +271,6 @@ class Container(Process):
             if pid > 0:
                 sys.exit(0)
 
-    def nsenter(self):
-        """Change current namespaces to pid namespaces.
-
-        Required:
-          self.kwargs['target_pid']
-
-        Uses:
-          'all' or any of ns arguments
-          self.proc
-
-        """
-        if self.kwargs['target_pid']:
-            setns(**self.kwargs)
-
     def chroot(self):
         """Change root with os.chroot.
 
@@ -378,10 +354,7 @@ class Container(Process):
         pass
 
 class Chroot(Container):
-    """Class wrapper over `pyspaces.Container`.
-
-    Deprecated since 1.4! Use Container with rootdir,
-    workdir, newuser and newns arguments.
+    """Class wrapper over `pyspaces.Container`
 
     Chroot objects represent activity that is run in a separate process
     in new filesystem and user namespaces.
@@ -470,7 +443,7 @@ class Inject(Container):
         if pop('all', pargs, pkwargs, False):
             nspaces.append('all')
         for ns in na:
-            if pop_all(na[ns]['aliases'], pargs, pkwargs, False):
+            if pop_all(na[ns]['aliases'], pargs, pkwargs, None):
                 nspaces.append(ns)
 
         pkwargs['args'] = ()
@@ -498,24 +471,30 @@ class Inject(Container):
             default is '/proc'
           all (bool): set all 6 namespaces,
             default is False
-          newuts (bool or str): enter uts namespace,
+          newuts, uts (bool or str): enter uts namespace,
             True or namespace file expected,
-            default is False
-          newipc (bool or str): enter ipc namespace,
+            does not enter ns enev with 'all' arg if False,
+            default is None
+          newipc, ipc (bool or str): enter ipc namespace,
             True or namespace file expected,
-            default is False
-          newuser (bool or str): enter user namespace,
+            does not enter ns enev with 'all' arg if False,
+            default is None
+          newuser, user (bool or str): enter user namespace,
             True or namespace file expected,
-            default is False
-          newpid (bool or str): enter pid namespace,
+            does not enter ns enev with 'all' arg if False,
+            default is None
+          newpid, pid (bool or str): enter pid namespace,
             True or namespace file expected,
-            default is False
-          newnet (bool or str): enter net namespace,
+            does not enter ns enev with 'all' arg if False,
+            default is None
+          newnet, net (bool or str): enter net namespace,
             True or namespace file expected,
-            default is False
-          newns (bool or str): enter mount namespace,
+            does not enter ns enev with 'all' arg if False,
+            default is None
+          newns, mnt (bool or str): enter mount namespace,
             True or namespace file expected,
-            default is False
+            does not enter ns enev with 'all' arg if False,
+            default is None
 
         """
         with setns(target_pid, self.pid, proc, *nspaces):

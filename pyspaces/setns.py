@@ -33,11 +33,33 @@ def setns(target_pid, parent_pid=0, proc='/proc', *args, **kwargs):
       **kwargs (dict): dict of namespaces
 
     As args or kwargs expected one or many of keys:
-    'all', 'ipc', 'newipc', 'mnt', 'newns',
-    'net', 'newnet', 'pid', 'newpid',
-    'user', 'newuser', 'uts', 'newuts'.
-    In kwargs True or namespace file expected
-    for each argument.
+      all (bool): set all 6 namespaces,
+        default is False
+      newuts, uts (bool or str): enter uts namespace,
+        True or namespace file expected,
+        does not enter ns enev with 'all' arg if False,
+        default is None
+      newipc, ipc (bool or str): enter ipc namespace,
+        True or namespace file expected,
+        does not enter ns enev with 'all' arg if False,
+        default is None
+      newuser, user (bool or str): enter user namespace,
+        True or namespace file expected,
+        does not enter ns enev with 'all' arg if False,
+        default is None
+      newpid, pid (bool or str): enter pid namespace,
+        True or namespace file expected,
+        does not enter ns enev with 'all' arg if False,
+        default is None
+      newnet, net (bool or str): enter net namespace,
+        True or namespace file expected,
+        does not enter ns enev with 'all' arg if False,
+        default is None
+      newns, mnt (bool or str): enter mount namespace,
+        True or namespace file expected,
+        does not enter ns enev with 'all' arg if False,
+        default is None
+
     If no one of them submitted 'all' will
     be used.
 
@@ -45,7 +67,7 @@ def setns(target_pid, parent_pid=0, proc='/proc', *args, **kwargs):
     parent_pid = parent_pid or getpid()
     # all as default
     if ((len(args) == 0 and len(kwargs) == 0) or
-       ('all' in args or 'all' in kwargs)):
+       ('all' in args or ('all' in kwargs and kwargs['all']))):
         all_ns = True
     else:
         all_ns = False
@@ -53,12 +75,12 @@ def setns(target_pid, parent_pid=0, proc='/proc', *args, **kwargs):
     fdtmp = '{0}/{1}/ns/{2}'
     try:
         for ns in na:
-            value = pop_all(na[ns]['aliases'], args, kwargs, '')
-            if all_ns or value:
-                if type(value) is str and exists(value):
-                    namespace = value
-                else:
-                    namespace = fdtmp.format(proc, target_pid, na[ns]['aliases'][0])
+            value = pop_all(na[ns]['aliases'], args, kwargs, None)
+            if type(value) is str and exists(value):
+                namespace = value
+            elif value or (all_ns and value is None):
+                namespace = fdtmp.format(proc, target_pid, na[ns]['aliases'][0])
+            if namespace:
                 with open(namespace) as f:
                     if libc.setns(f.fileno(), na[ns]['flag']) == -1:
                         raise ValueError("Namespace file %s has invalid type %s" %
