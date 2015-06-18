@@ -15,6 +15,7 @@
 - Chroot class now based on Container
 - change pid to target_pid first argument in setns
 - set to None default values for 6 ns flags in Container.__init__ and setns
+- up README and docs
 
 ### Removed
 - except block from setns

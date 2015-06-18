@@ -59,7 +59,7 @@ Child returned: pid 15978, status 0
 ## CLI
 
 ```bash
-space execute -v --pid --mnt --user --uid '0 1000 1' bash -c 'mount -t proc /proc; ps ax'
+space execute -v --pid --mnt --user --uid 1000 --gid 1000 bash -c 'mount -t proc /proc; ps ax'
 ```
 
 ```bash
@@ -67,20 +67,24 @@ space chroot --pid --uid '0 1000 1' ~/.local/share/lxc/ubuntu/rootfs/ /bin/ls /h
 ```
 
 ```bash
-sudo space inject --net --mnt 19840 bash
+space inject --net --mnt 19840 bash
 ```
 
 Note: If the program you're trying to exec is dynamic linked, and the dynamic linker is not present in /lib in the chroot environment - you would get the "OSError: [Errno 2] No such file or directory" error. You'd need all the other files the dynamic-linked program depends on, including shared libraries and any essential configuration/table/etc in the new root directories. [src](http://www.ciiycode.com/0JiJzPgggqPg/why-doesnt-exec-work-after-chroot)
+
+## Changelog
+[on github](https://github.com/Friz-zy/pyspaces/blob/master/CHANGELOG.md)
+[digest](https://allmychanges.com/p/python/pyspaces/)
 
 ## TODO
 
 - [x] clone & Container
 - [x] CLI
 - [x] Chroot
-- [ ] process list
 - [x] inject
 - [ ] move CLI to separate package
 - [ ] addons
+- [ ] container list
 - [ ] support for lxc, vagga, rocket, docker, etc...
 - [ ] ...
 - [ ] one tool for rule them all!!1

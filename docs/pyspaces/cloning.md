@@ -103,6 +103,10 @@ Variables
 
 - **RTLD_LOCAL**
 
+- **SIGCHLD**
+
+- **SIGKILL**
+
 - **STACK_SIZE**
 
     STACK_SIZE (1024 * 1024)

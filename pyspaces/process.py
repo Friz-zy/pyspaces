@@ -373,12 +373,12 @@ class Chroot(Container):
           If the program you're trying to exec is dynamic
           linked, and the dynamic linker is not present in /lib
           in the chroot environment - you would get the
-          "OSError: [Errno 2] No such file or directory" error.
+          "OSError [Errno 2] No such file or directory" error.
           You'd need all the other files the dynamic-linked
           program depends on, including shared libraries and
           any essential configuration/table/etc in the new
           root directories.
-          [src](http://www.ciiycode.com/0JiJzPgggqPg/why-doesnt-exec-work-after-chroot)
+          [src](www.ciiycode.com/0JiJzPgggqPg/why-doesnt-exec-work-after-chroot)
 
         Args:
           path (str): path to chroot new root
