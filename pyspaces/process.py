@@ -400,7 +400,7 @@ class Chroot(Container):
         ckwargs['newns'] = True
         Container.__init__(self, *cargs, **ckwargs)
 
-class Inject(Container):
+class Inject(Process):
     """Class wrapper over `multiprocessing.Process`.
 
     Create process in namespaces of another one.
@@ -426,8 +426,8 @@ class Inject(Container):
             default is {}
           proc (str): root directory of proc fs,
             default is '/proc'
-          *pargs (list): arguments for Container.__init__
-          **pkwargs (dict): arguments for Container.__init__
+          *pargs (list): arguments for Process.__init__
+          **pkwargs (dict): arguments for Process.__init__
 
         In args or kwargs expected one or many of
         many keys for setns:
