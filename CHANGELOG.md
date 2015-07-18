@@ -1,4 +1,8 @@
 ## [Unreleased][unreleased]
+### Added
+- security.md
+- Security paragraph in readme
+
 
 ## 1.4 - 2015-06-18
 ### Added

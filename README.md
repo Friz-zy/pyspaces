@@ -72,16 +72,32 @@ space inject --net --mnt 19840 bash
 
 Note: If the program you're trying to exec is dynamic linked, and the dynamic linker is not present in /lib in the chroot environment - you would get the "OSError: [Errno 2] No such file or directory" error. You'd need all the other files the dynamic-linked program depends on, including shared libraries and any essential configuration/table/etc in the new root directories. [src](http://www.ciiycode.com/0JiJzPgggqPg/why-doesnt-exec-work-after-chroot)
 
+## Security
+
+- https://opensource.com/business/14/7/docker-security-selinux
+- https://opensource.com/business/14/9/security-for-docker
+- http://www.slideshare.net/jpetazzo/docker-linux-containers-lxc-and-security
+- http://www.itworld.com/article/2920349/security/for-containers-security-is-problem-1.html
+- https://mjg59.dreamwidth.org/33170.html
+- http://blog.sei.cmu.edu/post.cfm/container-security-devops-176
+
+Read essential in [security.md](https://github.com/Friz-zy/pyspaces/blob/master/security.md) file
+
 ## Changelog
-[on github](https://github.com/Friz-zy/pyspaces/blob/master/CHANGELOG.md)
-[digest](https://allmychanges.com/p/python/pyspaces/)
+[on github](https://github.com/Friz-zy/pyspaces/blob/master/CHANGELOG.md)  
+[digest](https://allmychanges.com/p/python/pyspaces/)  
 
 ## TODO
 
-- [x] clone & Container
+- [x] namespaces: clone & Container
 - [x] CLI
 - [x] Chroot
-- [x] inject
+- [x] setns & inject
+- [ ] cgroups
+- [ ] SCM: apparmor & selinux
+- [ ] capabilities
+- [ ] mount
+- [ ] network
 - [ ] move CLI to separate package
 - [ ] addons
 - [ ] container list

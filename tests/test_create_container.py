@@ -37,7 +37,7 @@ def test_basic_container(capfd):
     c.start()
     c.join()
     out, err = capfd.readouterr()
-    print out, err
+    print(out, err)
     assert len(out.splitlines()) == 3
 
 def test_all_ns_container(capfd):
@@ -59,7 +59,7 @@ def test_all_ns_container(capfd):
     c.start()
     c.join()
     out, err = capfd.readouterr()
-    print out, err
+    print(out, err)
     assert len(out.splitlines()) == 3
 
 def test_not_all_ns_container(capfd):
@@ -88,8 +88,8 @@ def test_not_all_ns_container(capfd):
     i.join()
     c.join()
     out, err = capfd.readouterr()
-    print out0
-    print out, err
+    print(out0)
+    print(out, err)
     assert out != out0
 
 def test_basic_chroot(capfd):
@@ -101,7 +101,7 @@ def test_basic_chroot(capfd):
     c.start()
     c.join()
     out, err = capfd.readouterr()
-    print out, err
+    print(out, err)
     assert out == 'ubuntu\n'
 
 def test_all_inject(capfd):
@@ -118,7 +118,7 @@ def test_all_inject(capfd):
     i.join()
     c.join()
     out, err = capfd.readouterr()
-    print out, err
+    print(out, err)
     assert out.split()[:2] == ["uid=0(root)", "gid=65534(nogroup)"]
 
 def test_not_all_inject(capfd):
@@ -136,8 +136,8 @@ def test_not_all_inject(capfd):
     i.join()
     c.join()
     out, err = capfd.readouterr()
-    print out0
-    print out, err
+    print(out0)
+    print(out, err)
     assert out != out0
 
 def test_all_setns(capfd):
@@ -150,7 +150,11 @@ def test_all_setns(capfd):
     with setns(c.pid, all=True):
         outt = s.check_output("id", shell=True)
     out, err = capfd.readouterr()
-    print out, err
-    print outt
+    print(out, err)
+    print(outt)
     c.join()
     assert outt.split()[:2] == ["uid=0(root)", "gid=65534(nogroup)"]
+
+
+if __name__ == '__main__':
+    pytest.main()
