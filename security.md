@@ -52,7 +52,7 @@ Docker uses copy-on-write file systems. This means containers can use the same f
 
 * absolute privilages -> run it in separate vm
 
-5)general like immutable infrastructure
+5) general like immutable infrastructure
 
 * container is ro
 * write to small separate rw nosuid part
@@ -63,10 +63,10 @@ Docker uses copy-on-write file systems. This means containers can use the same f
 ## software for security
 
 Things are better. For example, most modern container technologies can make use of Linux's built-in security tools such as:  
-[AppArmor](http://wiki.apparmor.net/index.php/Main_Page), [SELinux](http://selinuxproject.org/page/Main_Page) and Seccomp](http://man7.org/linux/man-pages/man2/seccomp.2.html) policies;  
+[AppArmor](http://wiki.apparmor.net/index.php/Main_Page), [SELinux](http://selinuxproject.org/page/Main_Page) and [Seccomp](http://man7.org/linux/man-pages/man2/seccomp.2.html) policies;  
 [Grsecurity](https://grsecurity.net/);  
 [Control groups (cgroups)](https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Resource_Management_Guide/ch01.html);  
-[Kernel namespaces](http://man7.org/linux/man-pages/man7/namespaces.7.html  
+[Kernel namespaces](http://man7.org/linux/man-pages/man7/namespaces.7.html)  
 [src](http://www.itworld.com/article/2920349/security/for-containers-security-is-problem-1.html)
 
 Sure, you're deploying seccomp, but you can't use selinux inside your container, because the policy isn't per-namespace (?? lxc uses apparmore for each container...)  
@@ -74,18 +74,16 @@ Sure, you're deploying seccomp, but you can't use selinux inside your container,
 [src](https://mjg59.dreamwidth.org/33170.html)
 
 Major kernel subsystems are not namespaced like:  
-  
 SELinux  
 Cgroups  
 file systems under /sys  
-/proc/sys, /proc/sysrq-trigger, /proc/irq, /proc/bus  
-  
+/proc/sys, /proc/sysrq-trigger, /proc/irq, /proc/bus
+
 Devices are not namespaced:  
-  
 /dev/mem  
 /dev/sd* file system devices  
-Kernel Modules  
-  
+kernel modules
+
 If you can communicate or attack one of these as a privileged process, you can own the system.  
 [src](https://opensource.com/business/14/7/docker-security-selinux)
 
