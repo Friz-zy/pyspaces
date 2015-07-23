@@ -1,5 +1,5 @@
 # pyspaces
-Works with Linux namespaces througth glibc with pure python
+Works with Linux namespaces through glibc with pure python
 
 [![License](https://pypip.in/license/pyspaces/badge.svg)](https://pypi.python.org/pypi/pyspaces/)
 [![Latest Version](https://pypip.in/version/pyspaces/badge.svg)](https://pypi.python.org/pypi/pyspaces/)
@@ -10,15 +10,15 @@ discuss: [reddit](https://www.reddit.com/r/Python/comments/33z84l/linux_namespac
 
 ## Goals
 
-There is so many beautiful tools like [docker](https://github.com/docker/docker), [rocket](https://github.com/coreos/rkt) and [vagga](https://github.com/tailhook/vagga) written on go and rust, but no one on python.
-I think that is because there is no easy way to works with linux namespaces on python:
+There is so many beautiful tools like [docker](https://github.com/docker/docker), [rocket](https://github.com/coreos/rkt) and [vagga](https://github.com/tailhook/vagga) written in go and rust, but none in python.
+I think that is because there is no easy way to work with linux namespaces in python:
 
-* you can use [asylum](https://pypi.python.org/pypi/asylum/0.4.1) - project that looks like dead and with codebase hosted not on mainstream hub like github
-* or you can use [python-libvirt](https://pypi.python.org/pypi/libvirt-python/1.2.13) bindings with big layer of abstraction
-* or just use native glibc library with ctypes
-* otherwise subprocess.Popen your choice
+* you can use [asylum](https://pypi.python.org/pypi/asylum/0.4.1) - a project that looks dead and with a codebase hosted not on mainstream hub like github
+* or you can use the [python-libvirt](https://pypi.python.org/pypi/libvirt-python/1.2.13) bindings with a big layer of abstraction
+* or just use the native glibc library with ctypes
+* otherwise subprocess.Popen -- your choice
 
-I want to change it: i want to create native python bindings to glibc with interface of python multiprocessing.Process.
+I want to change this: I want to create native python bindings to glibc with interface of python multiprocessing.Process.
 
 PS: you can look at [python-nsenter](https://github.com/zalando/python-nsenter) too, it's looks awesome.
 
@@ -70,7 +70,7 @@ space chroot --pid --uid '0 1000 1' ~/.local/share/lxc/ubuntu/rootfs/ /bin/ls /h
 space inject --net --mnt 19840 bash
 ```
 
-Note: If the program you're trying to exec is dynamic linked, and the dynamic linker is not present in /lib in the chroot environment - you would get the "OSError: [Errno 2] No such file or directory" error. You'd need all the other files the dynamic-linked program depends on, including shared libraries and any essential configuration/table/etc in the new root directories. [src](http://www.ciiycode.com/0JiJzPgggqPg/why-doesnt-exec-work-after-chroot)
+Note: If the program you're trying to exec is dynamically linked, and the dynamic linker is not present in /lib in the chroot environment - you will get the following error: "OSError: [Errno 2] No such file or directory". You need all the other files the dynamic-linked program depends on, including shared libraries and any essential configuration/tables/etc in the new root directories. [src](http://www.ciiycode.com/0JiJzPgggqPg/why-doesnt-exec-work-after-chroot)
 
 ## Security
 
