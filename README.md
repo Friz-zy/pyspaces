@@ -74,14 +74,7 @@ Note: If the program you're trying to exec is dynamically linked, and the dynami
 
 ## Security
 
-- https://opensource.com/business/14/7/docker-security-selinux
-- https://opensource.com/business/14/9/security-for-docker
-- http://www.slideshare.net/jpetazzo/docker-linux-containers-lxc-and-security
-- http://www.itworld.com/article/2920349/security/for-containers-security-is-problem-1.html
-- https://mjg59.dreamwidth.org/33170.html
-- http://blog.sei.cmu.edu/post.cfm/container-security-devops-176
-
-Read essential in [security.md](https://github.com/Friz-zy/pyspaces/blob/master/security.md) file
+Read [this article](https://github.com/Friz-zy/awesome-linux-containers#security) please
 
 ## Changelog
 [on github](https://github.com/Friz-zy/pyspaces/blob/master/CHANGELOG.md)  
