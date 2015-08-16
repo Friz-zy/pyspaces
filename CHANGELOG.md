@@ -3,6 +3,8 @@
 - security.md
 - Security paragraph in readme
 
+### Changed
+- move security content to https://github.com/Friz-zy/awesome-linux-containers#security
 
 ## 1.4 - 2015-06-18
 ### Added
