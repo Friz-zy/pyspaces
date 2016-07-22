@@ -74,7 +74,7 @@ class Container(Process):
             "0 1000 1,1 1001 1" or "1000,1001"
             will map 1000 as root and 1001 as uid 1.
             list: list of int or str
-            default is ""sys.version_info >= (2,5)
+            default is ""
           gid_map (bool, int, str, list): GID mapping
             for new namespace, format the same as uid_map,
             default is ""
