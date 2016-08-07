@@ -12,7 +12,10 @@ import os
 import sys
 from .setns import setns
 from . import cloning as cl
-from inspect import getargspec
+if sys.version_info >= (3,0):
+    from inspect import signature
+else:
+    from inspect import getargspec
 from multiprocessing import Process
 from .args_aliases import na, ca, get, get_all, pop, pop_all
 
@@ -185,9 +188,14 @@ class Container(Process):
                 self.clone_flags |= ca[flag]['flag']
 
         kwargs = {}
-        for k in getargspec(Process.__init__).args:
-            if k in self.kwargs:
-                kwargs[k] = self.kwargs[k]
+        if sys.version_info >= (3,0):
+            for k in signature(Process.__init__).parameters:
+                if k in self.kwargs:
+                    kwargs[k] = self.kwargs[k]
+        else:
+            for k in getargspec(Process.__init__).args:
+                if k in self.kwargs:
+                    kwargs[k] = self.kwargs[k]
         kwargs['target'] = self.runup
         kwargs['args'] = ()
         kwargs['kwargs'] = {}
